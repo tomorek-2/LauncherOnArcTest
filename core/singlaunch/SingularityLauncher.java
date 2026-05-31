@@ -1,4 +1,4 @@
-package launcher;
+package singlaunch;
 
 import arc.ApplicationCore;
 import arc.Core;
