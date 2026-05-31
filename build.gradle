@@ -20,7 +20,5 @@ repositories {
 }
 
 dependencies{
-    def useLatest = false // BE? БЕ БЕ
-    compileOnly useLatest ? "Anuken:MindustryBuilds:latest" : "Anuken:Mindustry:$mindustryVersion"
-    annotationProcessor "Anuken:jabel:v1.0.0"
+    implementation "com.github.Anuken.Arc:arc-core:a046279"
 }
