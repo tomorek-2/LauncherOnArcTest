@@ -19,7 +19,8 @@ repositories {
     maven { url "https://www.jitpack.io" }
 }
 
-dependencies {
-    compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
-  //  implementation "com.github.Anuken.Mindustry:core:$mindustryVersion"
+dependencies{
+    def useLatest = false // BE? БЕ БЕ
+    compileOnly useLatest ? "Anuken:MindustryBuilds:latest" : "Anuken:Mindustry:$mindustryVersion"
+    annotationProcessor "Anuken:jabel:v1.0.0"
 }
