@@ -4,6 +4,8 @@ import arc.ApplicationCore;
 import arc.Core;
 import arc.backend.sdl.SdlApplication;
 import arc.backend.sdl.SdlConfig;
+import backends/backend-sdl/src/arc/backend/sdl;
+import arc.backend.sdl.SdlConfig;
 import arc.files.Fi;
 import arc.util.Log;
 
