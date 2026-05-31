@@ -22,7 +22,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Build with Gradle
-        run: "./gradlew build --no-daemon --refresh-dependencies"
+        run: "./gradlew build --no-daemon"
 
       - name: Upload mod JAR
         uses: actions/upload-artifact@v4
