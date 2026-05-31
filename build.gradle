@@ -20,5 +20,5 @@ repositories {
 }
 
 dependencies{
-    implementation "com.github.Anuken.Arc:arc-core:a046279"
+   compileOnly "com.github.Anuken.Arc:arc-core:a046279"
 }
