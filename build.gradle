@@ -1,0 +1,25 @@
+plugins {
+    id 'java'
+}
+
+version = '0.0.1'
+
+def mindustryVersion = 'v146'
+
+sourceSets {
+    named("main") {
+        java {
+            srcDirs = ['core']
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://www.jitpack.io" }
+}
+
+dependencies {
+    implementation "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+    implementation "com.github.Anuken.Mindustry:core:$mindustryVersion"
+}
