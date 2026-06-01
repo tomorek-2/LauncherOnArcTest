@@ -4,8 +4,8 @@ import arc.ApplicationCore;
 import arc.Core;
 import arc.backend.sdl.SdlApplication;
 import arc.backend.sdl.SdlConfig;
-import arc.backend.*;
-import arc.backend.sdl.SdlConfig;
+
+import arc.backend.sdl.*;
 import arc.*;
 import arc.backend.sdl.*;
 import arc.files.Fi;
