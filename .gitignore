@@ -1,0 +1,5 @@
+.gradle/
+build/
+AGENTS.md
+.idea/
+*.iml
