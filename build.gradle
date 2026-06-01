@@ -22,3 +22,13 @@ repositories {
 dependencies{
    compileOnly "com.github.Anuken.Arc:arc-core:a046279"
 }
+task pluginJar(type: Jar) {
+    archiveFileName = "${project.name}.jar" 
+    from{
+        configurations.runtimeClasspath.collect{ it.isDirectory() ? it : zipTree(it) }
+    }
+
+
+
+
+}
