@@ -21,7 +21,7 @@ repositories {
 
 dependencies{
    implementation "com.github.Anuken.Arc:arc-core:a046279"
-    implementation "com.github.Anuken.Arc:arc-backend:a046279"
+    implementation "com.github.Anuken.Arc:arc-backends:a046279"
 }
 task pluginJar(type: Jar) {
     archiveFileName = "${project.name}.jar" 
