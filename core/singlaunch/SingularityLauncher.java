@@ -64,6 +64,6 @@ public class SingularityLauncher extends ApplicationCore {
         config.width = 400;
         config.height = 300;
 
-        new SdlApplication(new MindustryLauncher(), config);
+        new SdlApplication(new SingularityLauncher(), config);
     }
 }

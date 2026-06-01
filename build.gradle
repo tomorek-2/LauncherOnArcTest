@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 version = '0.0.1'
@@ -17,19 +18,17 @@ sourceSets {
 repositories {
     mavenCentral()
     maven { url "https://www.jitpack.io" }
-}
-
-dependencies{
-   implementation "com.github.Anuken.Arc:arc-core:a046279"
-    implementation "com.github.Anuken.Arc:backend-sdl:a046279"
-}
-task pluginJar(type: Jar) {
-    archiveFileName = "${project.name}.jar" 
-    from{
-        configurations.runtimeClasspath.collect{ it.isDirectory() ? it : zipTree(it) }
+    flatDir {
+        dirs "$rootDir/../Arc/arc-core/build/libs", "$rootDir/../Arc/backends/backend-sdl/build/libs"
     }
+}
 
+dependencies {
+    implementation "arc-core:arc-core:1.0"
+    implementation "backend-sdl:backend-sdl:1.0"
+    implementation "com.github.Anuken.Mindustry:core:$mindustryVersion"
+}
 
-
-
+application {
+    mainClass = 'singlaunch.SingularityLauncher'
 }
