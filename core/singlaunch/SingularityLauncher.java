@@ -32,6 +32,7 @@ import java.util.ArrayList;
 
 public class SingularityLauncher extends ApplicationCore {
 
+
     private static final String VERSIONS_DIR = "versions";
     private ArrayList<Fi> jarFiles = new ArrayList<>();
     private Fi selectedJar;
