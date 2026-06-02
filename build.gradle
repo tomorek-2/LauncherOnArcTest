@@ -21,6 +21,8 @@ dependencies {
         implementation 'com.github.Anuken.Arc:backend-sdl:v158.1'
 }
 
+
+
 application {
     mainClass = 'singlaunch.SingularityLauncher'
 }
