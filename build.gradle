@@ -4,7 +4,6 @@ plugins {
 }
 
 version = '0.0.1'
-mainClassName: "singlaunch.SingularityLauncher"
 
 
 sourceSets {
