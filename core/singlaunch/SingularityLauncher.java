@@ -77,7 +77,9 @@ public class SingularityLauncher extends ApplicationCore {
             scene.act();
             scene.draw();
         }
-scanVersions();
+        Core.input.addProcessor(scene);
+
+
     }
 
     private void registerDefaultStyles() {
@@ -339,7 +341,7 @@ scanVersions();
     }
 
     private void launchMindustry(String jarPath) {
-        while (true) {
+
             Log.info("Starting: " + jarPath);
             try {
                 new ProcessBuilder("java", "-jar", jarPath)
@@ -349,7 +351,7 @@ scanVersions();
             } catch (IOException e) {
                 Log.err("Start failed: ", e);
             }
-        }
+
     }
     public static void main(String[] args){
             SdlConfig config = new SdlConfig();
