@@ -77,6 +77,7 @@ public class SingularityLauncher extends ApplicationCore {
             scene.act();
             scene.draw();
         }
+scanVersions();
     }
 
     private void registerDefaultStyles() {
