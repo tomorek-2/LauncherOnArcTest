@@ -43,7 +43,6 @@
     position: relative;
     box-shadow: 0 0 60px rgba(255, 211, 121, 0.08);
   }
-  /* Угловые засечки */
   .launcher::before, .launcher::after {
     content: '';
     position: absolute;
@@ -61,6 +60,7 @@
     justify-content: space-between;
     align-items: center;
     background: var(--bg);
+    -webkit-app-region: drag;
   }
   .logo {
     font-family: 'JetBrains Mono', monospace;
@@ -157,6 +157,7 @@
     align-items: center;
     gap: 12px;
     overflow: hidden;
+    -webkit-app-region: no-drag;
   }
   .btn::before {
     content: '';
@@ -198,6 +199,13 @@
     box-shadow: 0 0 22px rgba(255, 211, 121, 0.35);
   }
 
+  .btn.selected {
+    background: var(--accent);
+    color: var(--bg);
+    box-shadow: 0 0 12px rgba(255, 211, 121, 0.25);
+  }
+  .btn.selected::before { background: var(--bg); }
+
   footer {
     padding: 10px 24px;
     background: var(--bg);
@@ -223,7 +231,6 @@
     50% { opacity: 0.4; box-shadow: 0 0 0 4px rgba(255,211,121,0); }
   }
 
-  /* Toast */
   .toast {
     position: fixed;
     bottom: 32px;
@@ -238,6 +245,7 @@
     letter-spacing: 0.12em;
     transition: transform 0.28s cubic-bezier(.2,.7,.3,1);
     z-index: 100;
+    pointer-events: none;
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
 </style>
@@ -249,37 +257,36 @@
         <div class="logo-mark"></div>
         MINDUSTRY <span>// LAUNCHER</span>
       </div>
-      <div class="version">v140.2 — build 7281</div>
+      <div class="version" id="versionText">Singularity v0.1</div>
     </header>
 
     <main>
       <div class="preview">
         <canvas id="bg"></canvas>
         <div class="preview-tag">STABLE</div>
-        <div class="preview-info">
-          Последняя сессия: <b>Серпуло</b><br>
-          Время в игре: <b>47ч 12м</b>
+        <div class="preview-info" id="previewInfo">
+          Последняя сессия: <b>—</b><br>
+          Время в игре: <b>—</b>
         </div>
       </div>
 
-      <nav class="menu">
-        <button class="btn primary" data-action="play">ИГРАТЬ</button>
-        <button class="btn" data-action="settings">НАСТРОЙКИ</button>
-        <button class="btn" data-action="mods">МОДЫ</button>
-        <button class="btn" data-action="exit">ВЫХОД</button>
+      <nav class="menu" id="menu">
+        <button class="btn primary" data-action="play" onclick="javaApp.play()">ИГРАТЬ</button>
+        <button class="btn" data-action="settings" onclick="javaApp.settings()">НАСТРОЙКИ</button>
+        <button class="btn" data-action="mods" onclick="javaApp.mods()">МОДЫ</button>
+        <button class="btn" data-action="exit" onclick="javaApp.exit()">ВЫХОД</button>
       </nav>
     </main>
 
     <footer>
-      <div class="status">Система готова</div>
-      <div>Игроков в сети: 1 247</div>
+      <div class="status" id="statusText">Система готова</div>
+      <div id="onlineCount">Игроков в сети: —</div>
     </footer>
   </div>
 
   <div class="toast" id="toast"></div>
 
   <script>
-    // ===== Анимация превью: сетка блоков + конвейер =====
     const canvas = document.getElementById('bg');
     const ctx = canvas.getContext('2d');
 
@@ -289,7 +296,7 @@
       initBlocks();
     }
 
-    const BLOCK = 38;
+    const BLOCK = 48;
     let blocks = [];
     function initBlocks() {
       blocks = [];
@@ -298,13 +305,13 @@
       for (let i = 0; i < cols; i++) {
         for (let j = 0; j < rows; j++) {
           const r = Math.random();
-          if (r > 0.78) {
+          if (r > 0.88) {
             blocks.push({
               x: i * BLOCK,
               y: j * BLOCK,
               life: Math.random() * 200,
               maxLife: 180 + Math.random() * 220,
-              type: r > 0.93 ? 'turret' : 'block'
+              type: r > 0.95 ? 'turret' : 'block'
             });
           }
         }
@@ -315,11 +322,17 @@
     window.addEventListener('resize', resize);
 
     let t = 0;
-    function draw() {
+    let lastFrame = 0;
+    const FPS = 30;
+    const interval = 1000 / FPS;
+
+    function draw(now) {
+      requestAnimationFrame(draw);
+      if (now - lastFrame < interval) return;
+      lastFrame = now;
       ctx.fillStyle = '#1a1a1a';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Сетка
       ctx.strokeStyle = 'rgba(255, 211, 121, 0.05)';
       ctx.lineWidth = 1;
       for (let x = 0; x <= canvas.width; x += BLOCK) {
@@ -329,7 +342,6 @@
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
       }
 
-      // Блоки (фабрики/турели)
       blocks.forEach(b => {
         b.life += 1;
         if (b.life > b.maxLife) {
@@ -354,7 +366,6 @@
         }
       });
 
-      // Конвейер
       const cy = Math.floor(canvas.height / 2 / BLOCK) * BLOCK + BLOCK/2;
       ctx.strokeStyle = 'rgba(255, 211, 121, 0.32)';
       ctx.lineWidth = 2;
@@ -363,7 +374,6 @@
       ctx.lineTo(canvas.width, cy);
       ctx.stroke();
 
-      // Пунктир движения
       ctx.strokeStyle = 'rgba(255, 211, 121, 0.5)';
       ctx.lineWidth = 2;
       ctx.setLineDash([8, 14]);
@@ -374,7 +384,6 @@
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Ресурс на конвейере
       const resX = (t * 1.4) % (canvas.width + 30) - 15;
       ctx.fillStyle = '#ffd379';
       ctx.fillRect(resX, cy - 5, 10, 10);
@@ -382,7 +391,6 @@
       ctx.lineWidth = 1;
       ctx.strokeRect(resX, cy - 5, 10, 10);
 
-      // Дрон
       const dx = (Math.sin(t * 0.008) * 0.5 + 0.5) * canvas.width;
       const dy = cy - 60 - Math.sin(t * 0.04) * 14;
       ctx.fillStyle = 'rgba(255, 211, 121, 0.85)';
@@ -395,32 +403,43 @@
       ctx.stroke();
 
       t++;
-      requestAnimationFrame(draw);
     }
-    draw();
+    requestAnimationFrame(draw);
 
-    // ===== Кнопки =====
-    const toast = document.getElementById('toast');
-    let toastTimer;
     function showToast(text) {
+      const toast = document.getElementById('toast');
       toast.textContent = text;
       toast.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
     }
 
-    const messages = {
-      play: 'Запуск Mindustry...',
-      settings: 'Открыты настройки',
-      mods: 'Загрузка менеджера модов',
-      exit: 'Завершение работы лаунчера'
-    };
+    function setStatus(text) {
+      document.getElementById('statusText').textContent = text;
+    }
 
-    document.querySelectorAll('.btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        showToast(messages[btn.dataset.action]);
+    function setVersionText(text) {
+      document.getElementById('versionText').textContent = text;
+    }
+
+    function setVersions(names) {
+      const menu = document.getElementById('menu');
+      const existing = menu.querySelectorAll('.btn.version-btn');
+      existing.forEach(b => b.remove());
+
+      const playBtn = menu.querySelector('[data-action="play"]');
+      names.forEach((name, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn version-btn' + (i === 0 ? ' selected' : '');
+        btn.textContent = name;
+        btn.onclick = () => {
+          menu.querySelectorAll('.btn.version-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          javaApp.selectVersion(i);
+        };
+        menu.insertBefore(btn, playBtn);
       });
-    });
+    }
   </script>
 </body>
 </html>
