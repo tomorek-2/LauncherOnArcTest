@@ -6,11 +6,15 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.web.WebEngine;
 
-import java.awt.Desktop;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class JavaBridge {
@@ -20,6 +24,8 @@ public class JavaBridge {
     private final InstanceManager instanceManager;
     private final VersionDownloader versionDownloader;
     private final GameLauncher gameLauncher;
+    private final ModBrowserService modBrowserService;
+    private final ModInstaller modInstaller;
     private final WebEngine webEngine;
     private final Consumer<String> status;
 
@@ -30,6 +36,8 @@ public class JavaBridge {
         this.instanceManager = instanceManager;
         this.versionDownloader = versionDownloader;
         this.gameLauncher = gameLauncher;
+        this.modBrowserService = new ModBrowserService();
+        this.modInstaller = new ModInstaller();
         this.webEngine = webEngine;
         this.status = status;
     }
@@ -46,12 +54,22 @@ public class JavaBridge {
             settings.selectedVersionId = versions.get(0).id;
         }
 
+        InstanceInfo instance = instanceManager.get(settings.selectedInstanceId);
+        GameVersion version = findVersion(resolveVersionId(instance, settings));
+        int[] parsed = version != null
+                ? GameVersionUtil.parse(version.id, version.name)
+                : new int[]{0, 0};
+
         Map<String, Object> payload = new HashMap<>();
         payload.put("settings", settings);
         payload.put("instances", instances);
         payload.put("versions", versions);
         payload.put("launcherDir", LauncherPaths.root().toAbsolutePath().toString());
         payload.put("systemRamMb", (int) (Runtime.getRuntime().maxMemory() / (1024 * 1024)));
+        payload.put("gameBuild", parsed[0]);
+        payload.put("gameRevision", parsed[1]);
+        payload.put("gameVersionLabel", GameVersionUtil.format(parsed[0], parsed[1]));
+        payload.put("installedModKeys", listInstalledModKeys(instance));
         return GSON.toJson(payload);
     }
 
@@ -69,6 +87,7 @@ public class JavaBridge {
         configManager.save();
         InstanceInfo instance = instanceManager.get(id);
         runJs("onInstanceSelected(" + jsQuote(instance.name) + ")");
+        refreshData();
     }
 
     public void selectVersion(String id) {
@@ -178,16 +197,13 @@ public class JavaBridge {
     }
 
     public void openInstanceFolder() {
-        LauncherSettings settings = configManager.getSettings();
-        InstanceInfo instance = instanceManager.get(settings.selectedInstanceId);
+        InstanceInfo instance = instanceManager.get(configManager.getSettings().selectedInstanceId);
         openFolder(InstanceManager.dataDir(instance).toFile());
     }
 
     public void openModsFolder() {
-        LauncherSettings settings = configManager.getSettings();
-        InstanceInfo instance = instanceManager.get(settings.selectedInstanceId);
+        InstanceInfo instance = resolveModsInstance(null);
         File mods = InstanceManager.dataDir(instance).resolve("mods").toFile();
-        mods.mkdirs();
         openFolder(mods);
     }
 
@@ -200,7 +216,129 @@ public class JavaBridge {
     }
 
     public void mods() {
-        openModsFolder();
+        runJs("openPanel('mods')");
+        loadMods("");
+    }
+
+    public void loadMods(String query) {
+        loadMods(query, null);
+    }
+
+    public void loadMods(String query, String instanceId) {
+        Task<String> task = new Task<>() {
+            @Override
+            protected String call() throws Exception {
+                List<ModListing> mods = modBrowserService.search(query);
+                InstanceInfo instance = resolveModsInstance(instanceId);
+                GameVersion version = findVersion(resolveVersionId(instance, configManager.getSettings()));
+                int[] parsed = version != null
+                        ? GameVersionUtil.parse(version.id, version.name)
+                        : new int[]{0, 0};
+                Set<String> installed = listInstalledModKeys(instance);
+
+                List<Map<String, Object>> rows = new ArrayList<>();
+                for (ModListing mod : mods) {
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("repo", mod.repo);
+                    row.put("name", mod.name);
+                    row.put("author", mod.author);
+                    row.put("description", mod.description);
+                    row.put("stars", mod.stars);
+                    row.put("hasJava", mod.hasJava);
+                    row.put("minGameVersion", mod.minGameVersion);
+                    row.put("compatible", GameVersionUtil.isAtLeast(parsed[0], parsed[1], mod.minGameVersion));
+                    row.put("installed", installed.contains(repoKey(mod.repo)));
+                    rows.add(row);
+                }
+
+                Map<String, Object> payload = new HashMap<>();
+                payload.put("mods", rows);
+                payload.put("instanceId", instance.id);
+                payload.put("instanceName", instance.name);
+                payload.put("gameVersionLabel", GameVersionUtil.format(parsed[0], parsed[1]));
+                payload.put("gameBuild", parsed[0]);
+                payload.put("gameRevision", parsed[1]);
+                return GSON.toJson(payload);
+            }
+
+            @Override
+            protected void succeeded() {
+                runJs("onModsLoaded(" + getValue() + ")");
+            }
+
+            @Override
+            protected void failed() {
+                Throwable error = getException();
+                runJs("showToast(" + jsQuote(error != null ? error.getMessage() : "Ошибка загрузки модов") + ")");
+            }
+        };
+        new Thread(task, "mod-list").start();
+    }
+
+    public void installMod(String repo, boolean hasJava, String instanceId) {
+        InstanceInfo instance = resolveModsInstance(instanceId);
+        ModListing resolvedListing = null;
+        try {
+            resolvedListing = modBrowserService.findByRepo(repo);
+        } catch (Exception ignored) {}
+
+        if (resolvedListing != null && !isCompatible(resolvedListing, instance)) {
+            runJs("showToast('Мод несовместим с версией инстанса')");
+            return;
+        }
+
+        final ModListing installListing = resolvedListing;
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                Platform.runLater(() -> runJs("setDownloadProgress(0, 'Установка мода...')"));
+                if (installListing != null) {
+                    modInstaller.installFromListing(installListing, instance, progress ->
+                            Platform.runLater(() -> runJs("setDownloadProgress(" + progress + ", 'Установка мода...')")));
+                } else {
+                    modInstaller.installFromGithub(repo, hasJava, instance, progress ->
+                            Platform.runLater(() -> runJs("setDownloadProgress(" + progress + ", 'Установка мода...')")));
+                }
+                return null;
+            }
+
+            @Override
+            protected void succeeded() {
+                runJs("setDownloadProgress(-1, '')");
+                runJs("showToast('Мод установлен')");
+                refreshData();
+                loadMods("", instance.id);
+            }
+
+            @Override
+            protected void failed() {
+                runJs("setDownloadProgress(-1, '')");
+                Throwable error = getException();
+                runJs("showToast(" + jsQuote(error != null ? error.getMessage() : "Ошибка установки") + ")");
+            }
+        };
+        new Thread(task, "mod-install").start();
+    }
+
+    public void importGithubMod(String input, String instanceId) {
+        if (input == null || input.isBlank()) return;
+        String repo = input.trim();
+        if (repo.startsWith("https://github.com/")) repo = repo.substring("https://github.com/".length());
+        if (repo.endsWith("/")) repo = repo.substring(0, repo.length() - 1);
+
+        boolean hasJava = false;
+        try {
+            ModListing listing = modBrowserService.findByRepo(repo);
+            if (listing != null) {
+                if (!isCompatible(listing, resolveModsInstance(instanceId))) {
+                    runJs("showToast('Мод несовместим с версией инстанса')");
+                    return;
+                }
+                hasJava = listing.hasJava;
+            }
+        } catch (Exception ignored) {}
+
+        installMod(repo, hasJava, instanceId);
     }
 
     public void exit() {
@@ -208,6 +346,38 @@ public class JavaBridge {
             Platform.exit();
             System.exit(0);
         });
+    }
+
+    private boolean isCompatible(ModListing mod, InstanceInfo instance) {
+        GameVersion version = findVersion(resolveVersionId(instance, configManager.getSettings()));
+        int[] parsed = version != null
+                ? GameVersionUtil.parse(version.id, version.name)
+                : new int[]{0, 0};
+        return GameVersionUtil.isAtLeast(parsed[0], parsed[1], mod.minGameVersion);
+    }
+
+    private InstanceInfo resolveModsInstance(String instanceId) {
+        if (instanceId != null && !instanceId.isBlank()) {
+            return instanceManager.get(instanceId);
+        }
+        return instanceManager.get(configManager.getSettings().selectedInstanceId);
+    }
+
+    private Set<String> listInstalledModKeys(InstanceInfo instance) {
+        Set<String> keys = new HashSet<>();
+        Path modsDir = InstanceManager.dataDir(instance).resolve("mods");
+        if (!Files.isDirectory(modsDir)) return keys;
+        try (var stream = Files.list(modsDir)) {
+            stream.filter(path -> {
+                String name = path.getFileName().toString().toLowerCase();
+                return name.endsWith(".zip") || name.endsWith(".jar");
+            }).forEach(path -> keys.add(path.getFileName().toString().replaceFirst("(?i)\\.(zip|jar)$", "")));
+        } catch (Exception ignored) {}
+        return keys;
+    }
+
+    private static String repoKey(String repo) {
+        return repo.replace("/", "");
     }
 
     private String resolveVersionId(InstanceInfo instance, LauncherSettings settings) {
@@ -228,14 +398,7 @@ public class JavaBridge {
     }
 
     private void openFolder(File folder) {
-        folder.mkdirs();
-        try {
-            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
-                Desktop.getDesktop().open(folder);
-            }
-        } catch (Exception e) {
-            runJs("showToast(" + jsQuote("Не удалось открыть папку") + ")");
-        }
+        DesktopUtil.openFolderAsync(folder, message -> runJs("showToast(" + jsQuote(message) + ")"));
     }
 
     private void runJs(String script) {
@@ -250,5 +413,4 @@ public class JavaBridge {
     private static String escapeJs(String value) {
         return value.replace("\\", "\\\\").replace("'", "\\'");
     }
-
 }

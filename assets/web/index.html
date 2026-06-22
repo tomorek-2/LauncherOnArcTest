@@ -156,8 +156,8 @@
   }
   .overlay.open { display: flex; }
   .panel {
-    width: 560px;
-    max-height: 480px;
+    width: 720px;
+    max-height: 520px;
     background: var(--bg-2);
     border: 2px solid var(--accent);
     display: flex;
@@ -206,6 +206,26 @@
     cursor: pointer;
   }
   .btn-sm.danger { border-color: var(--danger); color: var(--danger); }
+  .btn-sm:disabled { opacity: 0.45; cursor: not-allowed; }
+  .mod-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow: auto; }
+  .mod-item {
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 10px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: start;
+  }
+  .mod-item.incompatible { opacity: 0.55; }
+  .mod-item.installed { border-color: var(--accent); }
+  .mod-item .title { font-size: 14px; color: var(--text); margin-bottom: 4px; }
+  .mod-item .meta { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+  .mod-item .badge { font-size: 10px; color: var(--accent); letter-spacing: 0.08em; }
+  .mod-item .badge.bad { color: var(--danger); }
+  .mod-actions { display: flex; flex-direction: column; gap: 6px; }
+  .mods-toolbar { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+  .mods-summary { font-size: 12px; color: var(--text-dim); }
   .toast {
     position: fixed;
     bottom: 24px;
@@ -255,7 +275,8 @@
         <button class="btn primary" onclick="javaApp.play()">ИГРАТЬ</button>
         <button class="btn" onclick="javaApp.instances()">ИНСТАНСЫ</button>
         <button class="btn" onclick="javaApp.settings()">НАСТРОЙКИ</button>
-        <button class="btn" onclick="javaApp.mods()">ПАПКА МОДОВ</button>
+        <button class="btn" onclick="javaApp.mods()">МОДЫ</button>
+        <button class="btn" onclick="javaApp.openModsFolder()">ПАПКА МОДОВ</button>
         <button class="btn" onclick="javaApp.openInstanceFolder()">ДАННЫЕ ИНСТАНСА</button>
         <button class="btn" onclick="javaApp.exit()">ВЫХОД</button>
       </nav>
@@ -324,10 +345,51 @@
     </div>
   </div>
 
+  </div>
+
+  <div class="overlay" id="modsOverlay">
+    <div class="panel">
+      <div class="panel-header">
+        <strong>Браузер модов</strong>
+        <button class="btn-sm" onclick="closePanel('mods')">Закрыть</button>
+      </div>
+      <div class="panel-body">
+        <div class="mods-summary" id="modsSummary">Загрузка...</div>
+        <div class="row">
+          <div class="field">
+            <label>Инстанс для установки</label>
+            <select id="modsInstanceSelect" onchange="onModsInstanceChange()"></select>
+          </div>
+          <div class="field">
+            <label>Версия игры инстанса</label>
+            <input type="text" id="modsGameVersion" readonly>
+          </div>
+        </div>
+        <div class="mods-toolbar">
+          <div class="field" style="margin:0">
+            <input type="text" id="modsSearch" placeholder="Поиск по названию, автору, репозиторию" oninput="onModsSearch()">
+          </div>
+          <button class="btn-sm" onclick="javaApp.loadMods(document.getElementById('modsSearch').value || '', document.getElementById('modsInstanceSelect').value)">Обновить</button>
+        </div>
+        <div class="mod-list" id="modList"></div>
+        <div class="field">
+          <label>Импорт с GitHub (как в Mindustry)</label>
+          <div class="row">
+            <input type="text" id="githubModInput" placeholder="author/modname или URL GitHub">
+            <button class="btn" onclick="importGithubMod()">ИМПОРТ</button>
+          </div>
+        </div>
+        <button class="btn" onclick="javaApp.openModsFolder()">ОТКРЫТЬ ПАПКУ МОДОВ ИНСТАНСА</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script>
     let state = { settings: {}, instances: [], versions: [] };
+    let modsState = { mods: [], instanceId: '', gameVersionLabel: '' };
+    let modsSearchTimer;
 
     function applyBootstrap(data) {
       if (typeof data === 'string') data = JSON.parse(data);
@@ -396,6 +458,92 @@
       document.getElementById('javaPath').value = settings.javaPath || '';
       document.getElementById('extraJvmArgs').value = settings.extraJvmArgs || '';
       document.getElementById('keepLauncherOpen').checked = settings.keepLauncherOpen !== false;
+      renderModsInstanceSelect();
+    }
+
+    function renderModsInstanceSelect() {
+      const select = document.getElementById('modsInstanceSelect');
+      if (!select) return;
+      const settings = state.settings || {};
+      const instances = state.instances || [];
+      select.innerHTML = '';
+      instances.forEach(inst => {
+        const opt = document.createElement('option');
+        opt.value = inst.id;
+        opt.textContent = inst.name;
+        if (inst.id === (modsState.instanceId || settings.selectedInstanceId)) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    function onModsInstanceChange() {
+      const select = document.getElementById('modsInstanceSelect');
+      modsState.instanceId = select.value;
+      javaApp.loadMods(document.getElementById('modsSearch').value || '', select.value);
+    }
+
+    function onModsSearch() {
+      clearTimeout(modsSearchTimer);
+      modsSearchTimer = setTimeout(() => {
+        const instanceId = document.getElementById('modsInstanceSelect').value;
+        javaApp.loadMods(document.getElementById('modsSearch').value || '', instanceId);
+      }, 300);
+    }
+
+    function onModsLoaded(data) {
+      if (typeof data === 'string') data = JSON.parse(data);
+      modsState = data;
+      document.getElementById('modsSummary').textContent =
+        'Инстанс: ' + data.instanceName + ' · Версия: ' + data.gameVersionLabel +
+        ' · Показано модов: ' + (data.mods ? data.mods.length : 0);
+      document.getElementById('modsGameVersion').value = data.gameVersionLabel || '—';
+      renderModsInstanceSelect();
+
+      const list = document.getElementById('modList');
+      list.innerHTML = '';
+      (data.mods || []).forEach(mod => {
+        const item = document.createElement('div');
+        item.className = 'mod-item' +
+          (mod.installed ? ' installed' : '') +
+          (!mod.compatible ? ' incompatible' : '');
+        const req = mod.minGameVersion ? 'Требуется ' + mod.minGameVersion : 'Без ограничения';
+        item.innerHTML =
+          '<div>' +
+            '<div class="title">' + escapeHtml(mod.name || mod.repo) + '</div>' +
+            '<div class="meta">' + escapeHtml(mod.author || '') + ' · ★ ' + (mod.stars || 0) + '<br>' +
+            escapeHtml((mod.description || '').slice(0, 140)) + '</div>' +
+            '<div class="badge ' + (mod.compatible ? '' : 'bad') + '">' +
+              (mod.compatible ? 'Совместим' : 'Несовместим') + ' · ' + req +
+              (mod.installed ? ' · Установлен' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="mod-actions">' +
+            '<button class="btn-sm" ' + (mod.compatible ? '' : 'disabled') +
+              ' onclick="installMod(\'' + escapeAttr(mod.repo) + '\',' + (mod.hasJava ? 'true' : 'false') + ')">' +
+              (mod.installed ? 'ПЕРЕУСТАНОВИТЬ' : 'УСТАНОВИТЬ') +
+            '</button>' +
+          '</div>';
+        list.appendChild(item);
+      });
+    }
+
+    function installMod(repo, hasJava) {
+      const instanceId = document.getElementById('modsInstanceSelect').value;
+      javaApp.installMod(repo, hasJava, instanceId);
+    }
+
+    function importGithubMod() {
+      const input = document.getElementById('githubModInput').value;
+      const instanceId = document.getElementById('modsInstanceSelect').value;
+      javaApp.importGithubMod(input, instanceId);
+    }
+
+    function escapeHtml(text) {
+      return String(text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function escapeAttr(text) {
+      return String(text || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     }
 
     function saveSettings() {
@@ -431,6 +579,11 @@
 
     function openPanel(name) {
       document.getElementById(name + 'Overlay').classList.add('open');
+      if (name === 'mods') {
+        renderModsInstanceSelect();
+        const instanceId = document.getElementById('modsInstanceSelect').value;
+        javaApp.loadMods(document.getElementById('modsSearch')?.value || '', instanceId);
+      }
     }
 
     function closePanel(name) {

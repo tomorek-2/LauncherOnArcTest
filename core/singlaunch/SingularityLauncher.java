@@ -57,6 +57,7 @@ public class SingularityLauncher extends Application {
         stage.setScene(scene);
         stage.setResizable(false);
         stage.setOnHidden(e -> Platform.exit());
+        HyprlandSupport.floatOnOpen(stage);
         stage.show();
     }
 
