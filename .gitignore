@@ -3,3 +3,4 @@ build/
 AGENTS.md
 .idea/
 *.iml
+/versions/
