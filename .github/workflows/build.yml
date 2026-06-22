@@ -20,7 +20,7 @@ jobs:
 
 
       - name: Build with Gradle
-        run: "./gradlew build --no-daemon --refresh-dependencies"
+        run: "./gradlew shadowJar --no-daemon"
 
       - name: Upload mod JAR
         uses: actions/upload-artifact@v4
