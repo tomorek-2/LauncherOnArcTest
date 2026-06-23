@@ -34,6 +34,8 @@ import java.util.ArrayList;
 public class SingularityLauncher extends ApplicationCore {
 
 
+
+
     private static final String VERSIONS_DIR = "versions";
     private ArrayList<Fi> jarFiles = new ArrayList<>();
     private Fi selectedJar;
@@ -44,6 +46,8 @@ public class SingularityLauncher extends ApplicationCore {
 
     private Scene scene;
     private Label selectedVersionLabel;
+    Table main = new Table();
+
 
     @Override
     public void setup() {
@@ -65,6 +69,8 @@ public class SingularityLauncher extends ApplicationCore {
 
     @Override
     public void update() {
+
+
         int w = Core.graphics.getWidth();
         int h = Core.graphics.getHeight();
         if (w == 0 || h == 0) return;
@@ -78,9 +84,14 @@ public class SingularityLauncher extends ApplicationCore {
             scene.draw();
         }
         Core.input.addProcessor(scene);
+        if (main.visible) {
+            main.visible = false;
+        } else {
+            main.visible = true;
 
-
+        }
     }
+
 
     private void registerDefaultStyles() {
         Drawable panel = solidDrawable(Color.valueOf("2b2b36"));
@@ -127,7 +138,8 @@ public class SingularityLauncher extends ApplicationCore {
      */
     private Font generateFont(int fontSize) {
         try {
-            java.awt.Font awtFont = new java.awt.Font("SansSerif", java.awt.Font.BOLD, fontSize);
+          //  java.awt.Font awtFont = new java.awt.Font("SansSerif", java.awt.Font.BOLD, fontSize);
+            java.awt.Font awtFont = new java.awt.Font("Monospaced", java.awt.Font.BOLD, fontSize);
             String chars = " !\\\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
             int count = chars.length();
 
@@ -225,7 +237,10 @@ public class SingularityLauncher extends ApplicationCore {
             return null;
         }
     }
-
+    private Drawable loadTexture(String path) {
+        Texture tex = new Texture(Core.files.internal(path));
+        return new TextureRegionDrawable(new TextureRegion(tex));
+    }
     private void createUI() {
         Color bg = Color.valueOf("1e1e24");
         Color panel = Color.valueOf("2b2b36");
@@ -239,7 +254,7 @@ public class SingularityLauncher extends ApplicationCore {
         Drawable panelDrawable = solidDrawable(panel);
         Drawable hoverDrawable = solidDrawable(hover);
         Drawable accentDrawable = solidDrawable(accent);
-        Drawable greenDrawable = solidDrawable(green);
+        Drawable greenDrawable = loadTexture("Снимок экрана от 2026-06-23 07-40-29.png");
         Drawable greenHoverDrawable = solidDrawable(greenHover);
 
         // Standard text style
@@ -274,7 +289,7 @@ public class SingularityLauncher extends ApplicationCore {
         scrollStyle.background = solidDrawable(Color.valueOf("15151a"));
 
         // Main layout container
-        Table main = new Table();
+  //      Table main = new Table();
         main.setFillParent(true);
         main.setBackground(bgDrawable);
 
@@ -319,8 +334,18 @@ public class SingularityLauncher extends ApplicationCore {
                 launchMindustry(selectedJar.absolutePath());
             }
         });
+
+        arc.util.Timer.schedule(() -> {
+            int h = Core.graphics.getHeight();
+            int w = Core.graphics.getWidth();
+            launchBtn.x += 1f;
+            float RealX = launchBtn.x + launchBtn.getWidth();
+            if(RealX >= w) {
+                launchBtn.x = 0;
+            }
+        }, 1f, 0.01f);
         launchBtn.setDisabled(jarFiles.isEmpty());
-        main.add(launchBtn).width(280).height(60).padBottom(30);
+        main.add(launchBtn).width(280).height(60).padBottom(90);
 
         scene.add(main);
     }
@@ -346,10 +371,11 @@ public class SingularityLauncher extends ApplicationCore {
             try {
                  new ProcessBuilder("java", "-jar", jarPath)
                         .inheritIO()
-                        .start();
-         Core.app.exit();
+                        .start()
+                         .waitFor();
 
-            } catch (IOException e) {
+
+            } catch (IOException | InterruptedException e) {
                 Log.err("Start failed: ", e);
             }
 

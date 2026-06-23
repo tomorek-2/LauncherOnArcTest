@@ -4,3 +4,4 @@ AGENTS.md
 .idea/
 *.iml
 /versions/
+/cache/

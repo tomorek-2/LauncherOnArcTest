@@ -10,7 +10,7 @@ version = '0.0.1'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 repositories {
@@ -29,7 +29,7 @@ sourceSets {
 }
 
 dependencies {
-    implementation 'com.google.code.gson:gson:2.11.0'
+  /*  implementation 'com.google.code.gson:gson:2.11.0'
     def javafxVersion = '17.0.2'
     def javafxOs = osdetector.classifier
     if (javafxOs == 'linux-x86_64') javafxOs = 'linux'
@@ -41,7 +41,7 @@ dependencies {
         implementation "org.openjfx:javafx-graphics:$javafxVersion:$javafxOs"
         implementation "org.openjfx:javafx-web:$javafxVersion:$javafxOs"
 
-    }
+    } */
     implementation 'com.github.Anuken.Arc:arc-core:v158.1'
     implementation 'com.github.Anuken.Arc:backend-sdl:v158.1'
     implementation 'com.github.Anuken.Arc:natives-desktop:v158.1'
@@ -53,7 +53,7 @@ javafx {
 }
 
 application {
-    mainClass = 'singlaunch.LauncherEntry'
+    mainClass = 'singlaunch.SingularityLauncher'
 }
 
 run {
@@ -70,7 +70,7 @@ shadowJar {
     mergeServiceFiles()
     manifest {
         attributes(
-            'Main-Class': 'singlaunch.LauncherEntry'
+            'Main-Class': 'singlaunch.SingularityLauncher'
         )
     }
 }
@@ -79,7 +79,7 @@ tasks.named('build') {
     dependsOn shadowJar
 }
 
-tasks.register('distLauncher', Copy) {
+  /*tasks.register('distLauncher', Copy) {
     group = 'distribution'
     description = 'Assemble launcher JAR and run script'
     dependsOn shadowJar
@@ -105,4 +105,4 @@ tasks.register('distLauncher', Copy) {
         def script = layout.buildDirectory.file('dist/run.sh').get().asFile
         script.setExecutable(true)
     }
-}
+} */
