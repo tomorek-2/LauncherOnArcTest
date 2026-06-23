@@ -13,7 +13,10 @@ java {
         languageVersion = JavaLanguageVersion.of(17)
     }
 }
-
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
 sourceSets {
     named("main") {
         java {
@@ -37,7 +40,11 @@ dependencies {
         implementation "org.openjfx:javafx-controls:$javafxVersion:$javafxOs"
         implementation "org.openjfx:javafx-graphics:$javafxVersion:$javafxOs"
         implementation "org.openjfx:javafx-web:$javafxVersion:$javafxOs"
+
     }
+    implementation 'com.github.Anuken.Arc:arc-core:v158.1'
+    implementation 'com.github.Anuken.Arc:backend-sdl:v158.1'
+    implementation 'com.github.Anuken.Arc:natives-desktop:v158.1'
 }
 
 javafx {

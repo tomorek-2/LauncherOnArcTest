@@ -10,7 +10,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import netscape.javascript.JSObject;
-
+import arc.*;
 public class SingularityLauncher extends Application {
 
     private WebEngine webEngine;
@@ -70,5 +70,6 @@ public class SingularityLauncher extends Application {
     public static void main(String[] args) {
         System.setProperty("prism.lcdtext", "false");
         launch(args);
+
     }
 }

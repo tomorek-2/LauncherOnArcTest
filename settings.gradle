@@ -6,9 +6,11 @@ pluginManagement {
 }
 
 rootProject.name = 'LauncherTest'
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         mavenCentral()
+        maven { url 'https://jitpack.io' }  // ← Arc через JitPack
     }
 }
