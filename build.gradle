@@ -1,9 +1,9 @@
 plugins {
     id 'java'
     id 'application'
-    id 'org.openjfx.javafxplugin' version '0.1.0'
+ //   id 'org.openjfx.javafxplugin' version '0.1.0'
     id 'com.gradleup.shadow' version '9.3.2'
-    id 'com.google.osdetector' version '1.7.3'
+    // id 'com.google.osdetector' version '1.7.3'
 }
 
 version = '0.0.1'
@@ -46,11 +46,11 @@ dependencies {
     implementation 'com.github.Anuken.Arc:backend-sdl:v158.1'
     implementation 'com.github.Anuken.Arc:natives-desktop:v158.1'
 }
-
+/*
 javafx {
     version = "17.0.2"
     modules = ['javafx.web', 'javafx.controls', 'javafx.graphics']
-}
+} */
 
 application {
     mainClass = 'singlaunch.SingularityLauncher'
@@ -72,6 +72,7 @@ shadowJar {
         attributes(
             'Main-Class': 'singlaunch.SingularityLauncher'
         )
+
     }
 }
 

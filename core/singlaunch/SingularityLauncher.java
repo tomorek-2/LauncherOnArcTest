@@ -34,8 +34,6 @@ import java.util.ArrayList;
 public class SingularityLauncher extends ApplicationCore {
 
 
-
-
     private static final String VERSIONS_DIR = "versions";
     private ArrayList<Fi> jarFiles = new ArrayList<>();
     private Fi selectedJar;
@@ -84,12 +82,12 @@ public class SingularityLauncher extends ApplicationCore {
             scene.draw();
         }
         Core.input.addProcessor(scene);
-        if (main.visible) {
+    /*    if (main.visible) {
             main.visible = false;
         } else {
             main.visible = true;
 
-        }
+        }*/
     }
 
 
@@ -300,7 +298,7 @@ public class SingularityLauncher extends ApplicationCore {
 
         // Versions list
         Table listTable = new Table();
-        listTable.defaults().pad(4).fillX();
+        listTable.defaults().growX().pad(4);
 
         if (jarFiles.isEmpty()) {
             listTable.add(new Label("No versions found", regularLabelStyle)).pad(20).row();
@@ -308,8 +306,10 @@ public class SingularityLauncher extends ApplicationCore {
         } else {
             for (Fi jar : jarFiles) {
                 TextButton btn = new TextButton(jar.nameWithoutExtension(), versionStyle);
+
                 btn.clicked(() -> selectVersion(jar));
-                listTable.add(btn).width(360).height(45).row();
+
+                listTable.add(btn).width(360).height(45).fill(600, 300).row();
             }
         }
 
@@ -329,6 +329,8 @@ public class SingularityLauncher extends ApplicationCore {
 
         // Launch button
         TextButton launchBtn = new TextButton("LAUNCH", launchStyle);
+        TextButton wd = new TextButton(" ", launchStyle);
+        TextButton wd001 = new TextButton(" ", launchStyle);
         launchBtn.clicked(() -> {
             if (selectedJar != null) {
                 launchMindustry(selectedJar.absolutePath());
@@ -336,17 +338,24 @@ public class SingularityLauncher extends ApplicationCore {
         });
 
         arc.util.Timer.schedule(() -> {
+            listTable.x = 600;
+
+
             int h = Core.graphics.getHeight();
-            int w = Core.graphics.getWidth();
-            launchBtn.x += 1f;
-            float RealX = launchBtn.x + launchBtn.getWidth();
+            float w = wd.getWidth();
+            wd.x = 30;
+            wd.y = 450;
+            wd001.y = 550;
+          wd001.x += 1;
+            float RealX = wd001.x;
             if(RealX >= w) {
-                launchBtn.x = 0;
+                wd001.x = 30;
             }
         }, 1f, 0.01f);
         launchBtn.setDisabled(jarFiles.isEmpty());
-        main.add(launchBtn).width(280).height(60).padBottom(90);
-
+        main.add(launchBtn).width(280).height(60).padBottom(9);
+main.add(wd).width(450).height(210);
+        main.add(wd001).width(25).height(25);
         scene.add(main);
     }
 
@@ -383,9 +392,10 @@ public class SingularityLauncher extends ApplicationCore {
     public static void main(String[] args){
             SdlConfig config = new SdlConfig();
             config.title = "Singularity Launcher";
-            config.width = 600;
+            config.width = 900;
             config.height = 550;
-
+            config.fullscreen = false;
+            config.resizable = false;
             new SdlApplication(new SingularityLauncher(), config);
 
     }
