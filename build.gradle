@@ -4,6 +4,7 @@ plugins {
  //   id 'org.openjfx.javafxplugin' version '0.1.0'
     id 'com.gradleup.shadow' version '9.3.2'
     // id 'com.google.osdetector' version '1.7.3'
+
 }
 
 version = '0.0.1'
@@ -29,7 +30,7 @@ sourceSets {
 }
 
 dependencies {
-  /*  implementation 'com.google.code.gson:gson:2.11.0'
+    /*  implementation 'com.google.code.gson:gson:2.11.0'
     def javafxVersion = '17.0.2'
     def javafxOs = osdetector.classifier
     if (javafxOs == 'linux-x86_64') javafxOs = 'linux'
@@ -45,7 +46,27 @@ dependencies {
     implementation 'com.github.Anuken.Arc:arc-core:v158.1'
     implementation 'com.github.Anuken.Arc:backend-sdl:v158.1'
     implementation 'com.github.Anuken.Arc:natives-desktop:v158.1'
+    compileOnly files('/home/tomorek/AndroidSDK/build-tools/36.1.0/lib/d8.jar')
+    compileOnly files('/home/tomorek/AndroidSDK/platforms/android-26/data/annotations.zip')
+
+
 }
+/*android {
+    namespace 'com.tomorek.sensorbridge'
+    compileSdk 34
+    defaultConfig {
+        applicationId "com.tomorek.sensorbridge"
+        minSdk 26 // Honor 7C
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+      }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+} */
+
 /*
 javafx {
     version = "17.0.2"

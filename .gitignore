@@ -5,3 +5,5 @@ AGENTS.md
 *.iml
 /versions/
 /cache/
+local.properties
+assets/SingularityLauncher.zip
