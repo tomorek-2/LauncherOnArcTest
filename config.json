@@ -1,9 +1,0 @@
-{
-  "minMemoryMb": 512,
-  "maxMemoryMb": 2048,
-  "javaPath": "",
-  "keepLauncherOpen": true,
-  "selectedInstanceId": "default",
-  "selectedVersionId": "v158.1",
-  "extraJvmArgs": ""
-}
