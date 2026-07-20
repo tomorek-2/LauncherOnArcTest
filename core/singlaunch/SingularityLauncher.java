@@ -115,7 +115,7 @@ public class SingularityLauncher extends ApplicationCore {
 
     private Font generateFont(int fontSize) {
         try {
-            java.awt.Font awtFont = new java.awt.Font("Monospaced", 1, fontSize);
+            java.awt.Font awtFont = new java.awt.Font("SansSerif", 1, fontSize);
             String chars = " !\\\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
             int count = chars.length();
             BufferedImage tmp = new BufferedImage(1, 1, 2);
@@ -231,10 +231,10 @@ public class SingularityLauncher extends ApplicationCore {
         launchStyle.disabledFontColor = Color.gray;
         ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
         scrollStyle.background = this.solidDrawable(Color.valueOf("15151a"));
+        scrollStyle.background = this.loadTexture("cat.jpg");
         this.main.setFillParent(true);
-        this.main.setBackground(bgDrawable);
-       // this.main.add(new Label("SINGULARITY", titleLabelStyle)).padTop(30.0F).padBottom(5.0F).row();
-    //    this.main.add(new Label("Launcher", regularLabelStyle)).padBottom(20.0F).row();
+       this.main.setBackground(bgDrawable);
+
         Table listTable = new Table();
         if (this.jarFiles.isEmpty()) {
             listTable.add(new Label("No versions found", regularLabelStyle)).pad(20.0F).row();
@@ -249,9 +249,9 @@ public class SingularityLauncher extends ApplicationCore {
 
         ScrollPane scroll = new ScrollPane(listTable, scrollStyle);
         scroll.setScrollingDisabled(true, false);
-        this.main.add(scroll).width(400.0F).height(220.0F).pad(10.0F).row();
-      //  this.selectedVersionLabel = new Label("Selected: None", regularLabelStyle);
-      //  this.selectedVersionLabel.setColor(Color.lightGray);
+        this.main.add(scroll).width(400.0F).height(220.0F).pad(10.0F).center();
+       this.selectedVersionLabel = new Label("Selected: None", regularLabelStyle);
+        this.selectedVersionLabel.setColor(Color.lightGray);
         if (!this.jarFiles.isEmpty()) {
             this.selectVersion((Fi)this.jarFiles.get(0));
         }
@@ -265,22 +265,7 @@ public class SingularityLauncher extends ApplicationCore {
             }
 
         });
-       /* Timer.schedule(() -> {
-            launchBtn.x = 50.0F;
-            launchBtn.y = 280.0F;
 
-            scroll.setPosition(495.0F, 325.0F);
-            int h = Core.graphics.getHeight();
-            float w = wd.getWidth();
-            wd.x = 30.0F;
-            wd.y = 330.0F;
-
-            wd001.color.a = wd001.x / w;
-            float RealX = wd001.x;
-
-
-        }, 0.1F, 0.01F); */
-       // wd.addChild(wd001);
         wd001.setSize(25f, 25f);
         wd001.update(() -> {
             wd001.y = wd.y + wd.getHeight() / 2 - wd001.getHeight() / 2;
@@ -292,9 +277,9 @@ public class SingularityLauncher extends ApplicationCore {
       //  this.main.add(wd).left().width(25.0F).height(25.0F);
         launchBtn.setDisabled(this.jarFiles.isEmpty());
 
-       this.main.add(wd).left().width(450.0F).height(220.0F);
-       this.main.add(wd001).bottom().width(25.0F).height(25.0F);
-        this.main.add(launchBtn).bottom().width(280.0F).height(60.0F);
+       this.main.add(wd).width(450.0F).height(220.0F).left().row();
+       this.main.add(wd001).width(25.0F).height(25.0F).right();
+        this.main.add(launchBtn).bottom().width(280.0F).height(60.0F).row();
         this.scene.add(this.main);
         wd001.clicked(() -> System.exit(0));
 
@@ -320,8 +305,8 @@ public class SingularityLauncher extends ApplicationCore {
         Log.info("Starting: " + jarPath);
 
         try {
-            (new ProcessBuilder(new String[]{"java", "-jar", jarPath})).inheritIO().start().waitFor();
-        } catch (InterruptedException | IOException e) {
+            (new ProcessBuilder(new String[]{"java", "-jar", jarPath})).inheritIO().start();
+        } catch (IOException e) {
             Log.err("Start failed: ", e);
         }
 
@@ -331,10 +316,10 @@ public class SingularityLauncher extends ApplicationCore {
         SdlConfig config = new SdlConfig();
         config.title = "Singularity Launcher";
         config.width = 900;
-        config.height = 550;
+        config.height = 350;
         config.fullscreen = false;
         config.resizable = true;
-        config.decorated = true;
+        config.decorated = false;
         new SdlApplication(new SingularityLauncher(), config);
     }
 }
