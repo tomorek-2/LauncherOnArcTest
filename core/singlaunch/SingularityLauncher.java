@@ -21,6 +21,7 @@ import arc.scene.ui.Button;
 import arc.scene.ui.Label;
 import arc.scene.ui.ScrollPane;
 import arc.scene.ui.TextButton;
+import arc.scene.ui.TextField;
 import arc.scene.ui.layout.Table;
 import arc.util.Log;
 import arc.util.Timer;
@@ -45,12 +46,14 @@ public class SingularityLauncher extends ApplicationCore {
     private Scene scene;
     private Label selectedVersionLabel;
     Table main = new Table();
+    String pathVersions;
 
     public SingularityLauncher() {
     }
 
     public void setup() {
         Log.info("Launcher started!");
+        pathVersions = Core.files.local(VERSIONS_DIR).absolutePath();
         Core.batch = new SpriteBatch();
         Draw.batch(Core.batch);
         this.scene = new Scene(new ScreenViewport());
@@ -58,9 +61,11 @@ public class SingularityLauncher extends ApplicationCore {
         this.titleFont = this.generateFont(48);
         this.regularFont = this.generateFont(22);
         this.registerDefaultStyles();
-        this.scanVersions();
+
         this.createUI();
         Core.input.addProcessor(this.scene);
+
+        this.scanVersions();
     }
 
     public void update() {
@@ -92,7 +97,8 @@ public class SingularityLauncher extends ApplicationCore {
     }
 
     private void scanVersions() {
-        Fi dir = Core.files.local("versions");
+        this.jarFiles.clear();
+        Fi dir = Core.files.absolute(pathVersions);
         if (!dir.exists()) {
             dir.mkdirs();
             Log.info("Created versions directory: " + dir.absolutePath());
@@ -110,7 +116,7 @@ public class SingularityLauncher extends ApplicationCore {
         if (this.jarFiles.isEmpty()) {
             Log.warn("No JAR files found in 'versions/'", new Object[0]);
         }
-
+this.createUI();
     }
 
     private Font generateFont(int fontSize) {
@@ -196,6 +202,8 @@ public class SingularityLauncher extends ApplicationCore {
     }
 
     private void createUI() {
+main.clear();
+        this.scene.clear();
         Color bg = Color.valueOf("1e1e24");
         Color panel = Color.valueOf("2b2b36");
         Color hover = Color.valueOf("3b3b46");
@@ -213,7 +221,11 @@ public class SingularityLauncher extends ApplicationCore {
         regularLabelStyle.font = this.regularFont;
         regularLabelStyle.fontColor = textColor;
         Label.LabelStyle titleLabelStyle = new Label.LabelStyle();
+        TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle();
         titleLabelStyle.font = this.titleFont;
+        textFieldStyle.font = this.regularFont;
+        textFieldStyle.fontColor = textColor;
+        textFieldStyle.cursor = this.loadTexture("cat.png");
         titleLabelStyle.fontColor = accent;
         TextButton.TextButtonStyle versionStyle = new TextButton.TextButtonStyle();
         versionStyle.up = panelDrawable;
@@ -259,13 +271,14 @@ public class SingularityLauncher extends ApplicationCore {
         TextButton launchBtn = new TextButton("LAUNCH", launchStyle);
         TextButton wd = new TextButton(" ", launchStyle);
         TextButton wd001 = new TextButton(" ", launchStyle);
+        TextButton reloadBtn = new TextButton("reload", launchStyle);
         launchBtn.clicked(() -> {
             if (this.selectedJar != null) {
                 this.launchMindustry(this.selectedJar.absolutePath());
             }
 
         });
-
+        arc.scene.ui.TextField directoryChooseF = new TextField(pathVersions, textFieldStyle);
         wd001.setSize(25f, 25f);
         wd001.update(() -> {
             wd001.y = wd.y + wd.getHeight() / 2 - wd001.getHeight() / 2;
@@ -274,15 +287,17 @@ public class SingularityLauncher extends ApplicationCore {
                wd001.x = wd.x;
           } else   wd001.x += 1f;
         });
-      //  this.main.add(wd).left().width(25.0F).height(25.0F);
+
         launchBtn.setDisabled(this.jarFiles.isEmpty());
 
-       this.main.add(wd).width(450.0F).height(220.0F).left().row();
-       this.main.add(wd001).width(25.0F).height(25.0F).right();
-        this.main.add(launchBtn).bottom().width(280.0F).height(60.0F).row();
+       this.main.add(wd).width(450.0F).height(220.0F).left();
+       this.main.add(wd001).width(25.0F).height(25.0F).right().row();
+       this.main.add(reloadBtn).size(40f, 40f).right().right();
+        this.main.add(launchBtn).width(280.0F).height(60.0F).row();
+        this.main.add(directoryChooseF).width(500.0F).height(25.0F).row();
         this.scene.add(this.main);
         wd001.clicked(() -> System.exit(0));
-
+        reloadBtn.clicked(() -> this.scanVersions());
     }
 
     private void selectVersion(Fi jar) {
@@ -319,7 +334,7 @@ public class SingularityLauncher extends ApplicationCore {
         config.height = 350;
         config.fullscreen = false;
         config.resizable = true;
-        config.decorated = false;
+        config.decorated = true;
         new SdlApplication(new SingularityLauncher(), config);
     }
 }
