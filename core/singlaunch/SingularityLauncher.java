@@ -47,13 +47,17 @@ public class SingularityLauncher extends ApplicationCore {
     private Label selectedVersionLabel;
     Table main = new Table();
     String pathVersions;
+    String pathVersionsInput;
+    Table listTable = new Table();
 
     public SingularityLauncher() {
     }
 
     public void setup() {
         Log.info("Launcher started!");
-        pathVersions = Core.files.local(VERSIONS_DIR).absolutePath();
+       pathVersions = Core.files.local(VERSIONS_DIR).absolutePath().replace(System.getProperty("user.home"),  "");
+
+        pathVersionsInput = System.getProperty("user.home") + pathVersions;
         Core.batch = new SpriteBatch();
         Draw.batch(Core.batch);
         this.scene = new Scene(new ScreenViewport());
@@ -98,10 +102,10 @@ public class SingularityLauncher extends ApplicationCore {
 
     private void scanVersions() {
         this.jarFiles.clear();
-        Fi dir = Core.files.absolute(pathVersions);
+        Fi dir = Core.files.absolute(pathVersionsInput);
         if (!dir.exists()) {
-            dir.mkdirs();
-            Log.info("Created versions directory: " + dir.absolutePath());
+
+            Log.info("versions directory wasn't created");
         }
 
         Log.info("Scanning: " + dir.absolutePath());
@@ -116,7 +120,33 @@ public class SingularityLauncher extends ApplicationCore {
         if (this.jarFiles.isEmpty()) {
             Log.warn("No JAR files found in 'versions/'", new Object[0]);
         }
-this.createUI();
+//this.createUI();
+        TextButton.TextButtonStyle versionStyle = new TextButton.TextButtonStyle();
+        versionStyle.up = this.solidDrawable(Color.valueOf("2b2b36"));
+        versionStyle.over = this.solidDrawable(Color.valueOf("3b3b46"));
+        versionStyle.down = this.solidDrawable(Color.valueOf("f05d23"));
+        versionStyle.font = this.regularFont;
+        versionStyle.fontColor = Color.valueOf("ffffff");
+        Label.LabelStyle regularLabelStyle = new Label.LabelStyle();
+        regularLabelStyle.font = this.regularFont;
+        regularLabelStyle.fontColor = Color.valueOf("ffffff");
+
+        if (this.jarFiles.isEmpty()) {
+            listTable.clear();
+            listTable.add(new Label("No versions found", regularLabelStyle)).pad(20.0F).row();
+            listTable.add(new Label("Place .jar files in 'versions/' folder", regularLabelStyle)).row();
+        } else {
+            listTable.clear();
+            for(Fi jar : this.jarFiles) {
+                TextButton btn = new TextButton(jar.nameWithoutExtension(), versionStyle);
+                btn.clicked(() -> this.selectVersion(jar));
+                listTable.add(btn).width(360.0F).height(45.0F).fillX().pad(0.0F, 0.0F, 1.0F, 0.0F).row();
+            }
+        }
+        if (!this.jarFiles.isEmpty()) {
+            this.selectVersion((Fi)this.jarFiles.get(0));
+        }
+
     }
 
     private Font generateFont(int fontSize) {
@@ -152,7 +182,7 @@ this.createUI();
                 int x = col * cellW;
                 int y = row * cellH;
                 int cw = fm.charWidth(chars.charAt(i));
-                g.drawString(String.valueOf(chars.charAt(i)), (float)x + (float)(cellW - cw) / 8.0F, (float)(y + fm.getAscent() + 2));
+                g.drawString(String.valueOf(chars.charAt(i)), (float)x + (float)(cellW - cw) / 8.0F, (float)(y + fm.getAscent()- 6));
             }
 
             g.dispose();
@@ -247,18 +277,6 @@ main.clear();
         this.main.setFillParent(true);
        this.main.setBackground(bgDrawable);
 
-        Table listTable = new Table();
-        if (this.jarFiles.isEmpty()) {
-            listTable.add(new Label("No versions found", regularLabelStyle)).pad(20.0F).row();
-            listTable.add(new Label("Place .jar files in 'versions/' folder", regularLabelStyle)).row();
-        } else {
-            for(Fi jar : this.jarFiles) {
-                TextButton btn = new TextButton(jar.nameWithoutExtension(), versionStyle);
-                btn.clicked(() -> this.selectVersion(jar));
-                listTable.add(btn).width(360.0F).height(45.0F).fillX().pad(0.0F, 0.0F, 1.0F, 0.0F).row();
-            }
-        }
-
         ScrollPane scroll = new ScrollPane(listTable, scrollStyle);
         scroll.setScrollingDisabled(true, false);
         this.main.add(scroll).width(400.0F).height(220.0F).pad(10.0F).center();
@@ -270,6 +288,7 @@ main.clear();
 
         TextButton launchBtn = new TextButton("LAUNCH", launchStyle);
         TextButton wd = new TextButton(" ", launchStyle);
+        TextButton visibleBtn = new TextButton(" ", launchStyle);
         TextButton wd001 = new TextButton(" ", launchStyle);
         TextButton reloadBtn = new TextButton("reload", launchStyle);
         launchBtn.clicked(() -> {
@@ -282,20 +301,33 @@ main.clear();
         wd001.setSize(25f, 25f);
         wd001.update(() -> {
             wd001.y = wd.y + wd.getHeight() / 2 - wd001.getHeight() / 2;
-
+wd001.color.a = wd001.x / (wd.x + wd.getWidth());
            if (wd001.x >= (wd.x + wd.getWidth() - wd001.getWidth())) {
                wd001.x = wd.x;
           } else   wd001.x += 1f;
         });
 
         launchBtn.setDisabled(this.jarFiles.isEmpty());
+directoryChooseF.update(()->
+{
+    launchBtn.setDisabled(this.jarFiles.isEmpty());
+    pathVersionsInput = System.getProperty("user.home") + pathVersions;
+    pathVersions  = directoryChooseF.getText();
+});
 
        this.main.add(wd).width(450.0F).height(220.0F).left();
        this.main.add(wd001).width(25.0F).height(25.0F).right().row();
-       this.main.add(reloadBtn).size(40f, 40f).right().right();
-        this.main.add(launchBtn).width(280.0F).height(60.0F).row();
+
+       this.main.add(reloadBtn).size(170f, 50f).right();
+
+       this.main.add(launchBtn).width(250.0F).height(60.0F).row();
+        this.main.add(visibleBtn).width(25f).height(45f).right();
         this.main.add(directoryChooseF).width(500.0F).height(25.0F).row();
+
         this.scene.add(this.main);
+        visibleBtn.clicked(()->{
+           directoryChooseF.visible = directoryChooseF.visible  ? false : true;
+        });
         wd001.clicked(() -> System.exit(0));
         reloadBtn.clicked(() -> this.scanVersions());
     }

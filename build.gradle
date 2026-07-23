@@ -43,35 +43,14 @@ dependencies {
         implementation "org.openjfx:javafx-web:$javafxVersion:$javafxOs"
 
     } */
-    implementation 'com.github.Anuken.Arc:arc-core:v158.1'
-    implementation 'com.github.Anuken.Arc:backend-sdl:v158.1'
-    implementation 'com.github.Anuken.Arc:natives-desktop:v158.1'
+    implementation 'com.github.Anuken.Arc:arc-core:v159'
+    implementation 'com.github.Anuken.Arc:backend-sdl:v159'
+    implementation 'com.github.Anuken.Arc:natives-desktop:v159'
     compileOnly files('/home/tomorek/AndroidSDK/build-tools/36.1.0/lib/d8.jar')
     compileOnly files('/home/tomorek/AndroidSDK/platforms/android-26/data/annotations.zip')
 
 
 }
-/*android {
-    namespace 'com.tomorek.sensorbridge'
-    compileSdk 34
-    defaultConfig {
-        applicationId "com.tomorek.sensorbridge"
-        minSdk 26 // Honor 7C
-        targetSdk 34
-        versionCode 1
-        versionName "1.0"
-      }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-    }
-} */
-
-/*
-javafx {
-    version = "17.0.2"
-    modules = ['javafx.web', 'javafx.controls', 'javafx.graphics']
-} */
 
 application {
     mainClass = 'singlaunch.SingularityLauncher'
@@ -83,7 +62,7 @@ run {
 }
 
 tasks.named('jar') {
-    enabled = false
+    enabled = true
 }
 
 shadowJar {
