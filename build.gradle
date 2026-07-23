@@ -30,24 +30,12 @@ sourceSets {
 }
 
 dependencies {
-    /*  implementation 'com.google.code.gson:gson:2.11.0'
-    def javafxVersion = '17.0.2'
-    def javafxOs = osdetector.classifier
-    if (javafxOs == 'linux-x86_64') javafxOs = 'linux'
-    if (javafxOs == 'windows-x86_64') javafxOs = 'win'
-    if (javafxOs == 'osx-x86_64' || javafxOs == 'osx-aarch_64') javafxOs = 'mac'
-    if (javafxOs != null) {
-        implementation "org.openjfx:javafx-base:$javafxVersion:$javafxOs"
-        implementation "org.openjfx:javafx-controls:$javafxVersion:$javafxOs"
-        implementation "org.openjfx:javafx-graphics:$javafxVersion:$javafxOs"
-        implementation "org.openjfx:javafx-web:$javafxVersion:$javafxOs"
-
-    } */
+    implementation "com.github.Anuken.Arc:arcnet:v159"
     implementation 'com.github.Anuken.Arc:arc-core:v159'
     implementation 'com.github.Anuken.Arc:backend-sdl:v159'
     implementation 'com.github.Anuken.Arc:natives-desktop:v159'
     compileOnly files('/home/tomorek/AndroidSDK/build-tools/36.1.0/lib/d8.jar')
-    compileOnly files('/home/tomorek/AndroidSDK/platforms/android-26/data/annotations.zip')
+   // compileOnly files('/home/tomorek/AndroidSDK/platforms/android-26/data/annotations.zip')
 
 
 }

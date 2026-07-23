@@ -55,7 +55,7 @@ public class SingularityLauncher extends ApplicationCore {
 
     public void setup() {
         Log.info("Launcher started!");
-       pathVersions = Core.files.local(VERSIONS_DIR).absolutePath().replace(System.getProperty("user.home"),  "");
+       pathVersions = Core.files.local("").absolutePath().replace(System.getProperty("user.home"),  "");
 
         pathVersionsInput = System.getProperty("user.home") + pathVersions;
         Core.batch = new SpriteBatch();
@@ -318,9 +318,11 @@ directoryChooseF.update(()->
        this.main.add(wd).width(450.0F).height(220.0F).left();
        this.main.add(wd001).width(25.0F).height(25.0F).right().row();
 
-       this.main.add(reloadBtn).size(170f, 50f).right();
+       //this.main.add(reloadBtn).size(170f, 50f);
+        this.main.add(reloadBtn).size(170f, 50f);
+       this.main.add(launchBtn).width(250.0F).height(60.0F).left().row();
 
-       this.main.add(launchBtn).width(250.0F).height(60.0F).row();
+
         this.main.add(visibleBtn).width(25f).height(45f).right();
         this.main.add(directoryChooseF).width(500.0F).height(25.0F).row();
 
@@ -367,6 +369,7 @@ directoryChooseF.update(()->
         config.fullscreen = false;
         config.resizable = true;
         config.decorated = true;
+        config.vSyncEnabled = true;
         new SdlApplication(new SingularityLauncher(), config);
     }
 }
