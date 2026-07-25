@@ -14,6 +14,7 @@ import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Font;
 import arc.graphics.g2d.SpriteBatch;
 import arc.graphics.g2d.TextureRegion;
+import arc.input.KeyCode;
 import arc.scene.Scene;
 import arc.scene.style.Drawable;
 import arc.scene.style.TextureRegionDrawable;
@@ -57,7 +58,7 @@ public class SingularityLauncher extends ApplicationCore {
         Log.info("Launcher started!");
        pathVersions = Core.files.local("").absolutePath().replace(System.getProperty("user.home"),  "");
 
-        pathVersionsInput = System.getProperty("user.home") + pathVersions;
+        pathVersionsInput = System.getProperty("user.home") + pathVersions + "/" + VERSIONS_DIR;
         Core.batch = new SpriteBatch();
         Draw.batch(Core.batch);
         this.scene = new Scene(new ScreenViewport());
@@ -229,8 +230,19 @@ public class SingularityLauncher extends ApplicationCore {
     private Drawable loadTexture(String path) {
         Texture tex = new Texture(Core.files.internal(path));
         return new TextureRegionDrawable(new TextureRegion(tex));
-    }
+    } /*
+public void httpDownloadInListVersions(String url) {
+        try {
+            arc.util.Http.get(url, (response) -> {
+                byte[] data = response.getResult();
 
+            }, (error)->{
+                arc.util.Log.err("error", error.toString());
+            });
+        } catch (Exception e) {
+            Log.err("Error in httpDownloadInListVersions", e);
+        }
+} */
     private void createUI() {
 main.clear();
         this.scene.clear();
@@ -311,8 +323,14 @@ wd001.color.a = wd001.x / (wd.x + wd.getWidth());
 directoryChooseF.update(()->
 {
     launchBtn.setDisabled(this.jarFiles.isEmpty());
-    pathVersionsInput = System.getProperty("user.home") + pathVersions;
+
+    pathVersionsInput = System.getProperty("user.home") + pathVersions + "/" + VERSIONS_DIR;
     pathVersions  = directoryChooseF.getText();
+    if(Core.input.keyTap(KeyCode.enter)) {
+        if (this.selectedJar != null) {
+            this.launchMindustry(this.selectedJar.absolutePath());
+        }
+    }
 });
 
        this.main.add(wd).width(450.0F).height(220.0F).left();
