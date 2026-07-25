@@ -3,6 +3,7 @@ package singlaunch;
 
 import arc.ApplicationCore;
 import arc.Core;
+import arc.Files;
 import arc.backend.sdl.SdlApplication;
 import arc.backend.sdl.SdlConfig;
 import arc.files.Fi;
@@ -36,6 +37,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import javax.imageio.ImageIO;
 
 public class SingularityLauncher extends ApplicationCore {
@@ -230,11 +233,23 @@ public class SingularityLauncher extends ApplicationCore {
     private Drawable loadTexture(String path) {
         Texture tex = new Texture(Core.files.internal(path));
         return new TextureRegionDrawable(new TextureRegion(tex));
-    } /*
+    }
 public void httpDownloadInListVersions(String url) {
         try {
             arc.util.Http.get(url, (response) -> {
+                if(response.getStatus().code != 200) {
+                    Log.warn("Download latest version was occured, code error: "+response.getStatus().code+"");
+                }
                 byte[] data = response.getResult();
+             //   Log.info("httpDownloadInListVersions: скачивание идёт. ");
+Fi file = Core.files.absolute(pathVersionsInput + "versions/" + "LatestVersions.jar");
+                Log.info("httpDownloadInListVersions: скачивание идёт. "+file.absolutePath());
+if(Arrays.equals(data, file.readBytes())) {
+    Log.info("LatestVersions.jar is already downloaded");
+    return;
+}
+file.writeBytes(data, false);
+Core.app.post(()->this.scanVersions());
 
             }, (error)->{
                 arc.util.Log.err("error", error.toString());
@@ -242,7 +257,7 @@ public void httpDownloadInListVersions(String url) {
         } catch (Exception e) {
             Log.err("Error in httpDownloadInListVersions", e);
         }
-} */
+}
     private void createUI() {
 main.clear();
         this.scene.clear();
@@ -299,6 +314,7 @@ main.clear();
         }
 
         TextButton launchBtn = new TextButton("LAUNCH", launchStyle);
+        TextButton downloadBtn = new TextButton("download", launchStyle);
         TextButton wd = new TextButton(" ", launchStyle);
         TextButton visibleBtn = new TextButton(" ", launchStyle);
         TextButton wd001 = new TextButton(" ", launchStyle);
@@ -332,12 +348,16 @@ directoryChooseF.update(()->
         }
     }
 });
+downloadBtn.clicked(()->{
+   this.httpDownloadInListVersions("https://github.com/Anuken/MindustryBuilds/releases/download/27518/Mindustry-BE-Desktop-27518.jar");
+});
 
        this.main.add(wd).width(450.0F).height(220.0F).left();
        this.main.add(wd001).width(25.0F).height(25.0F).right().row();
 
        //this.main.add(reloadBtn).size(170f, 50f);
         this.main.add(reloadBtn).size(170f, 50f);
+        this.main.add(downloadBtn).size(170f, 50f);
        this.main.add(launchBtn).width(250.0F).height(60.0F).left().row();
 
 
