@@ -30,7 +30,7 @@ sourceSets {
 }
 
 dependencies {
-    implementation "com.github.Anuken.Arc:arcnet:v159"
+    implementation "com.github.Anuken.Arc:g3d:v159"
     implementation 'com.github.Anuken.Arc:arc-core:v159'
     implementation 'com.github.Anuken.Arc:backend-sdl:v159'
     implementation 'com.github.Anuken.Arc:natives-desktop:v159'

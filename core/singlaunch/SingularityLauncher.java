@@ -54,7 +54,8 @@ public class SingularityLauncher extends ApplicationCore {
     String pathVersions;
     String pathVersionsInput;
     Table listTable = new Table();
-String urlDownloadLatest ="https://github.com/Anuken/MindustryBuilds/releases/download/27519/Mindustry-BE-Desktop-27519.jar";
+    String[] urlsVersions;
+String urlDownloadLatest ="https://github.com/anuken/mindustry/releases/latest/download/Mindustry.jar";
     public SingularityLauncher() {
     }
 
@@ -91,7 +92,26 @@ String urlDownloadLatest ="https://github.com/Anuken/MindustryBuilds/releases/do
         //    Core.input.addProcessor(this.scene);
         }
     }
+public void getListUrl(String url) {
+        try {
+            arc.util.Http.get(url, response -> {
 
+                byte[] data = response.getResult();
+
+                String jsonText = new String(data, java.nio.charset.StandardCharsets.UTF_8);
+
+
+                arc.util.serialization.JsonValue json = new arc.util.serialization.JsonReader().parse(jsonText);
+
+
+        urlsVersions = json.asStringArray();
+
+
+            }, error -> Log.err("Ошибка сети", error));
+        } catch (Exception e) {
+            Log.err("Ошибка сети: "+e.toString());
+        }
+}
     private void registerDefaultStyles() {
         Drawable panel = this.solidDrawable(Color.valueOf("2b2b36"));
         Drawable hover = this.solidDrawable(Color.valueOf("3b3b46"));
@@ -122,6 +142,7 @@ String urlDownloadLatest ="https://github.com/Anuken/MindustryBuilds/releases/do
             }
         }
 
+
         if (this.jarFiles.isEmpty()) {
             Log.warn("No JAR files found in 'versions/'", new Object[0]);
         }
@@ -135,7 +156,15 @@ String urlDownloadLatest ="https://github.com/Anuken/MindustryBuilds/releases/do
         Label.LabelStyle regularLabelStyle = new Label.LabelStyle();
         regularLabelStyle.font = this.regularFont;
         regularLabelStyle.fontColor = Color.valueOf("ffffff");
+       /* if(urlsVersions.length != 0) {
+            for(String url : urlsVersions) {
 
+                    TextButton btn = new TextButton(url, versionStyle);
+                    btn.clicked(() -> this.httpDownloadInFile(url, ));
+                    listTable.add(btn).width(360.0F).height(45.0F).fillX().pad(0.0F, 0.0F, 1.0F, 0.0F).row();
+
+            }
+        } */
         if (this.jarFiles.isEmpty()) {
             listTable.clear();
             listTable.add(new Label("No versions found", regularLabelStyle)).pad(20.0F).row();
@@ -235,7 +264,7 @@ String urlDownloadLatest ="https://github.com/Anuken/MindustryBuilds/releases/do
         Texture tex = new Texture(Core.files.internal(path));
         return new TextureRegionDrawable(new TextureRegion(tex));
     }
-public void httpDownloadInListVersions(String url) {
+public void httpDownloadInFile(String url, String nameFile) {
         try {
             arc.util.Http.get(url, (response) -> {
                 if(response.getStatus().code != 200) {
@@ -243,7 +272,7 @@ public void httpDownloadInListVersions(String url) {
                 }
                 byte[] data = response.getResult();
              //   Log.info("httpDownloadInListVersions: скачивание идёт. ");
-Fi file = Core.files.absolute(pathVersionsInput + "/LatestVersions.jar");
+Fi file = Core.files.absolute(pathVersionsInput + "/"+nameFile);
                 Log.info("httpDownloadInListVersions: скачивание идёт. "+file.absolutePath());
 if(file.exists()) {
                 if(Arrays.equals(data, file.readBytes())) {
@@ -366,7 +395,7 @@ urlChooseDownload.update(()->{
 
 });
 downloadBtn.clicked(()->{
-   this.httpDownloadInListVersions(urlDownloadLatest);
+   this.httpDownloadInFile(urlDownloadLatest, "LatestVersions.jar");
 });
 
        this.main.add(wd).width(400.0F).height(220.0F).left();
