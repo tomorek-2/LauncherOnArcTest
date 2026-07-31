@@ -55,6 +55,7 @@ public class SingularityLauncher extends ApplicationCore {
     String pathVersionsInput;
     Table listTable = new Table();
     String[] urlsVersions;
+    String urlDownoadList = "https://raw.githubusercontent.com/tomorek-2/LauncherOnArcTest/refs/heads/main/urlVersions.json";
 String urlDownloadLatest ="https://github.com/anuken/mindustry/releases/latest/download/Mindustry.jar";
     public SingularityLauncher() {
     }
@@ -98,8 +99,8 @@ public void getListUrl(String url) {
 
                 byte[] data = response.getResult();
 
-                String jsonText = new String(data, java.nio.charset.StandardCharsets.UTF_8);
-
+                String jsonTextRaw = new String(data, java.nio.charset.StandardCharsets.UTF_8);
+                String jsonText = jsonTextRaw.substring(32).trim();
 
                 arc.util.serialization.JsonValue json = new arc.util.serialization.JsonReader().parse(jsonText);
 
@@ -153,18 +154,32 @@ public void getListUrl(String url) {
         versionStyle.down = this.solidDrawable(Color.valueOf("f05d23"));
         versionStyle.font = this.regularFont;
         versionStyle.fontColor = Color.valueOf("ffffff");
+        TextButton.TextButtonStyle remoteStyle = new TextButton.TextButtonStyle();
+        remoteStyle.up = this.solidDrawable(Color.valueOf("2b2b36"));
+        remoteStyle.over = this.solidDrawable(Color.valueOf("3b3b46"));
+        remoteStyle.down = this.solidDrawable(Color.valueOf("f05d23"));
+        remoteStyle.font = this.regularFont;
+        remoteStyle.fontColor = Color.valueOf("ffffff");
         Label.LabelStyle regularLabelStyle = new Label.LabelStyle();
         regularLabelStyle.font = this.regularFont;
         regularLabelStyle.fontColor = Color.valueOf("ffffff");
-       /* if(urlsVersions.length != 0) {
-            for(String url : urlsVersions) {
+        this.getListUrl(urlDownoadList);
+        if(urlsVersions != null) {
+            for(String line : urlsVersions) {
 
-                    TextButton btn = new TextButton(url, versionStyle);
-                    btn.clicked(() -> this.httpDownloadInFile(url, ));
-                    listTable.add(btn).width(360.0F).height(45.0F).fillX().pad(0.0F, 0.0F, 1.0F, 0.0F).row();
+                if (line.length() > 32) {
 
+                    String name = line.substring(0, 32).trim();
+
+                    String url = line.substring(32).trim();
+
+                    TextButton btn = new TextButton("[WEB] " + name, remoteStyle);
+                    btn.clicked(() -> this.httpDownloadInFile(url, name + ".jar"));
+                    listTable.add(btn).width(360f).height(45f).row();
+                }
             }
-        } */
+        }
+
         if (this.jarFiles.isEmpty()) {
             listTable.clear();
             listTable.add(new Label("No versions found", regularLabelStyle)).pad(20.0F).row();
