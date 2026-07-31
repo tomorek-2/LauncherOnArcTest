@@ -38,12 +38,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 
 import javax.imageio.ImageIO;
 
 public class SingularityLauncher extends ApplicationCore {
     private static final String VERSIONS_DIR = "versions";
-    private ArrayList<Fi> jarFiles = new ArrayList();
+    private HashSet<Fi> jarFiles = new HashSet<>();
     private Fi selectedJar;
     private Font titleFont;
     private Font regularFont;
@@ -100,13 +101,13 @@ public void getListUrl(String url) {
                 byte[] data = response.getResult();
 
                 String jsonTextRaw = new String(data, java.nio.charset.StandardCharsets.UTF_8);
-                String jsonText = jsonTextRaw.substring(32).trim();
+                String jsonText = jsonTextRaw.substring(0).trim();
 
                 arc.util.serialization.JsonValue json = new arc.util.serialization.JsonReader().parse(jsonText);
 
 
         urlsVersions = json.asStringArray();
-
+Core.app.post(()->this.scanVersions());
 
             }, error -> Log.err("Ошибка сети", error));
         } catch (Exception e) {
@@ -155,45 +156,43 @@ public void getListUrl(String url) {
         versionStyle.font = this.regularFont;
         versionStyle.fontColor = Color.valueOf("ffffff");
         TextButton.TextButtonStyle remoteStyle = new TextButton.TextButtonStyle();
-        remoteStyle.up = this.solidDrawable(Color.valueOf("2b2b36"));
-        remoteStyle.over = this.solidDrawable(Color.valueOf("3b3b46"));
+        remoteStyle.up = this.solidDrawable(Color.valueOf("#4278cf"));
+        remoteStyle.over = this.solidDrawable(Color.valueOf("#7393c7"));
         remoteStyle.down = this.solidDrawable(Color.valueOf("f05d23"));
         remoteStyle.font = this.regularFont;
         remoteStyle.fontColor = Color.valueOf("ffffff");
         Label.LabelStyle regularLabelStyle = new Label.LabelStyle();
         regularLabelStyle.font = this.regularFont;
         regularLabelStyle.fontColor = Color.valueOf("ffffff");
-        this.getListUrl(urlDownoadList);
+        listTable.clear();
+       if(urlsVersions == null) this.getListUrl(urlDownoadList);
         if(urlsVersions != null) {
-            for(String line : urlsVersions) {
+            for (String line : urlsVersions) {
 
                 if (line.length() > 32) {
 
                     String name = line.substring(0, 32).trim();
+                    if (!this.jarFiles.contains( new Fi(pathVersionsInput + "/" + name + ".jar"))) {
+                        String url = line.substring(32).trim();
 
-                    String url = line.substring(32).trim();
-
-                    TextButton btn = new TextButton("[WEB] " + name, remoteStyle);
-                    btn.clicked(() -> this.httpDownloadInFile(url, name + ".jar"));
-                    listTable.add(btn).width(360f).height(45f).row();
+                        TextButton btn = new TextButton("[WEB] " + name, remoteStyle);
+                        btn.clicked(() -> this.httpDownloadInFile(url, name + ".jar"));
+                        listTable.add(btn).width(360.0F).height(45.0F).fillX().pad(0.0F, 0.0F, 1.0F, 0.0F).row();
+                    }
                 }
             }
         }
-
         if (this.jarFiles.isEmpty()) {
             listTable.clear();
             listTable.add(new Label("No versions found", regularLabelStyle)).pad(20.0F).row();
             listTable.add(new Label("Place .jar files in 'versions/' folder", regularLabelStyle)).row();
         } else {
-            listTable.clear();
+
             for(Fi jar : this.jarFiles) {
                 TextButton btn = new TextButton(jar.nameWithoutExtension(), versionStyle);
                 btn.clicked(() -> this.selectVersion(jar));
                 listTable.add(btn).width(360.0F).height(45.0F).fillX().pad(0.0F, 0.0F, 1.0F, 0.0F).row();
             }
-        }
-        if (!this.jarFiles.isEmpty()) {
-            this.selectVersion((Fi)this.jarFiles.get(0));
         }
 
     }
@@ -357,9 +356,7 @@ main.clear();
         this.main.add(scroll).width(400.0F).height(220.0F).pad(10.0F).right();
        this.selectedVersionLabel = new Label("Selected: None", regularLabelStyle);
         this.selectedVersionLabel.setColor(Color.lightGray);
-        if (!this.jarFiles.isEmpty()) {
-            this.selectVersion((Fi)this.jarFiles.get(0));
-        }
+
 
         TextButton launchBtn = new TextButton("LAUNCH", launchStyle);
         TextButton downloadBtn = new TextButton("download", launchStyle);
