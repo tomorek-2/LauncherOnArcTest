@@ -349,7 +349,7 @@ main.clear();
         scrollStyle.background = this.loadTexture("cat.jpg");
         this.main.setFillParent(true);
        this.main.setBackground(bgDrawable);
-        this.mainButtons.setFillParent(true);
+       // this.mainButtons.setFillParent(true);
         this.mainButtons.setBackground(bgDrawable);
         ScrollPane scroll = new ScrollPane(listTable, scrollStyle);
         scroll.setScrollingDisabled(true, false);
@@ -374,20 +374,6 @@ main.clear();
         arc.scene.ui.TextField directoryChooseF = new TextField(pathVersions, textFieldStyle);
         arc.scene.ui.TextField urlChooseDownload = new TextField(urlDownloadLatest, textFieldStyle);
         wd001.setSize(25f, 25f);
-        wd001.update(() -> {
-            wd001.y = wd.y + wd.getHeight() / 3 - wd001.getHeight() / 2;
-wd001.color.a = wd001.x / (wd.x + wd.getWidth());
-           if (wd001.x >= (wd.x + wd.getWidth() - wd001.getWidth())) {
-               wd001.x = wd.x;
-          } else   wd001.x += 1f;
-           reloadBtn.x = wd.x + 10;
-reloadBtn.y = wd.y + 10;
-launchBtn.x=reloadBtn.x;
-launchBtn.y=reloadBtn.y+15+launchBtn.getHeight();
-downloadBtn.x=reloadBtn.x+15+downloadBtn.getWidth();
-downloadBtn.y=reloadBtn.y;
-
-        });
 
         launchBtn.setDisabled(this.jarFiles.isEmpty());
 directoryChooseF.update(()->
@@ -410,21 +396,22 @@ downloadBtn.clicked(()->{
    this.httpDownloadInFile(urlDownloadLatest, "LatestVersions.jar");
 });
 
-       this.main.add(wd).width(400.0F).height(220.0F).left();
+
        this.main.add(wd001).width(25.0F).height(25.0F).row();
 
-       //this.main.add(reloadBtn).size(170f, 50f);
-        this.main.add(downloadBtn).size(170f, 50f);
-        this.main.add(reloadBtn).size(170f, 50f).bottom();
 
-        this.main.add(launchBtn).width(170F).height(60.0F).row();
+        this.mainButtons.add(reloadBtn).size(170f, 50f);
 
-        this.main.add(urlChooseDownload).width(700.0F).height(25.0F).row();
+
+        this.mainButtons.add(launchBtn).width(170.0F).height(50.0F).row();
+
+        this.mainButtons.add(urlChooseDownload).width(700.0F).height(25.0F);
 
         this.main.add(visibleBtn).width(25f).height(45f).right();
         this.main.add(directoryChooseF).width(500.0F).height(25.0F).row();
         this.scene.add(this.main);
-      //  this.scene.add(this.mainButtons);
+
+       this.main.add(this.mainButtons);
         visibleBtn.clicked(()->{
            directoryChooseF.visible = directoryChooseF.visible  ? false : true;
         });
