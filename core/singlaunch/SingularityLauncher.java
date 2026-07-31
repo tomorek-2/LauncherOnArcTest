@@ -183,7 +183,7 @@ Core.app.post(()->this.scanVersions());
             }
         }
         if (this.jarFiles.isEmpty()) {
-            listTable.clear();
+
             listTable.add(new Label("No versions found", regularLabelStyle)).pad(20.0F).row();
             listTable.add(new Label("Place .jar files in 'versions/' folder", regularLabelStyle)).row();
         } else {
