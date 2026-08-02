@@ -1,6 +1,8 @@
 
 package singlaunch;
 
+import com.sun.jdi.connect.Connector;
+
 import arc.ApplicationCore;
 import arc.Core;
 import arc.Files;
@@ -56,6 +58,10 @@ public class SingularityLauncher extends ApplicationCore {
     String pathVersionsInput;
     Table listTable = new Table();
     String[] urlsVersions;
+    ArrayList<String> arguments = new ArrayList<String>();
+    String argument =
+            "-Xmx512M";
+
     String urlDownoadList = "https://raw.githubusercontent.com/tomorek-2/LauncherOnArcTest/refs/heads/main/urlVersions.json";
 String urlDownloadLatest ="https://github.com/anuken/mindustry/releases/latest/download/Mindustry.jar";
     public SingularityLauncher() {
@@ -361,7 +367,7 @@ main.clear();
         TextButton launchBtn = new TextButton("LAUNCH", launchStyle);
         TextButton downloadBtn = new TextButton("download", launchStyle);
         TextButton wd = new TextButton(" ", launchStyle);
-        ScrollPane mainButtonsScroll = new ScrollPane(mainButtons, scrollStyle);
+
         TextButton visibleBtn = new TextButton(" ", launchStyle);
         TextButton wd001 = new TextButton(" ", launchStyle);
         TextButton reloadBtn = new TextButton("reload", launchStyle);
@@ -372,7 +378,7 @@ main.clear();
 
         });
         arc.scene.ui.TextField directoryChooseF = new TextField(pathVersions, textFieldStyle);
-        arc.scene.ui.TextField urlChooseDownload = new TextField(urlDownloadLatest, textFieldStyle);
+        arc.scene.ui.TextField argumentField = new TextField(argument, textFieldStyle);
         wd001.setSize(25f, 25f);
 
         launchBtn.setDisabled(this.jarFiles.isEmpty());
@@ -388,24 +394,27 @@ directoryChooseF.update(()->
         }
     }
 });
-urlChooseDownload.update(()->{
-   urlDownloadLatest = urlChooseDownload.getText();
+argumentField.update(()->{
+   argument = argumentField.getText();
 
 });
 downloadBtn.clicked(()->{
    this.httpDownloadInFile(urlDownloadLatest, "LatestVersions.jar");
 });
 
+        this.main.add(argumentField).width(255F).height(50.0F).row();
 
-       this.main.add(wd001).width(25.0F).height(25.0F).row();
+
 
 
         this.mainButtons.add(reloadBtn).size(170f, 50f);
 
 
-        this.mainButtons.add(launchBtn).width(170.0F).height(50.0F).row();
+        this.mainButtons.add(launchBtn).width(170.0F).height(50.0F).right().row();
 
-        this.mainButtons.add(urlChooseDownload).width(700.0F).height(25.0F);
+this.main.add(wd001).size(10f);
+
+
 
         this.main.add(visibleBtn).width(25f).height(45f).right();
         this.main.add(directoryChooseF).width(500.0F).height(25.0F).row();
@@ -415,7 +424,9 @@ downloadBtn.clicked(()->{
         visibleBtn.clicked(()->{
            directoryChooseF.visible = directoryChooseF.visible  ? false : true;
         });
-        wd001.clicked(() -> System.exit(0));
+      wd001.clicked(()->{
+          Core.app.exit();
+      });
         reloadBtn.clicked(() ->{
             this.scanVersions();
             this.main.validate();
@@ -443,7 +454,21 @@ downloadBtn.clicked(()->{
         Log.info("Starting: " + jarPath);
 
         try {
-            (new ProcessBuilder(new String[]{"java", "-jar", jarPath})).inheritIO().start();
+            arguments.clear();
+arguments.add("java");
+
+            if (argument != null && !argument.trim().isEmpty()) {
+                String[] parts = argument.split(" ");
+                for (String part : parts) {
+                    if (!part.isEmpty()) arguments.add(part);
+                }
+            }
+
+arguments.add("-jar");
+arguments.add(jarPath);
+
+//new String[]{"java",  "-jar", jarPath
+            (new ProcessBuilder(arguments)).inheritIO().start();
         } catch (IOException e) {
             Log.err("Start failed: ", e);
         }
@@ -457,8 +482,10 @@ downloadBtn.clicked(()->{
         config.height = 350;
         config.fullscreen = false;
         config.resizable = true;
-        config.decorated = true;
+        config.decorated = false;
         config.vSyncEnabled = true;
-        new SdlApplication(new SingularityLauncher(), config);
+
+ new SdlApplication(new SingularityLauncher(), config);
+
     }
 }
