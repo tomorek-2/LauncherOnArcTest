@@ -8,3 +8,5 @@ AGENTS.md
 local.properties
 assets/SingularityLauncher.zip
 
+/.profileconfig.json
+/profile.jfr

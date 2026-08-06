@@ -206,7 +206,8 @@ Core.app.post(()->this.scanVersions());
     private Font generateFont(int fontSize) {
         try {
             java.awt.Font awtFont = new java.awt.Font("SansSerif", 1, fontSize);
-            String chars = " !\\\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+            String chars = " !\\\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" + "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяёЁ";
+            //String chars = " !\\\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
             int count = chars.length();
             BufferedImage tmp = new BufferedImage(1, 1, 2);
             Graphics2D tg = tmp.createGraphics();
@@ -359,7 +360,7 @@ main.clear();
         this.mainButtons.setBackground(bgDrawable);
         ScrollPane scroll = new ScrollPane(listTable, scrollStyle);
         scroll.setScrollingDisabled(true, false);
-        this.main.add(scroll).width(400.0F).height(220.0F).pad(10.0F).right();
+        this.main.add(scroll).width(400.0F).height(220.0F).pad(10.0F).right().row();
        this.selectedVersionLabel = new Label("Selected: None", regularLabelStyle);
         this.selectedVersionLabel.setColor(Color.lightGray);
 
@@ -402,7 +403,7 @@ downloadBtn.clicked(()->{
    this.httpDownloadInFile(urlDownloadLatest, "LatestVersions.jar");
 });
 
-        this.main.add(argumentField).width(255F).height(50.0F).row();
+    //    this.main.add(argumentField).width(255F).height(50.0F).row();
 
 
 
@@ -410,16 +411,15 @@ downloadBtn.clicked(()->{
         this.mainButtons.add(reloadBtn).size(170f, 50f);
 
 
-        this.mainButtons.add(launchBtn).width(170.0F).height(50.0F).right().row();
+        this.mainButtons.add(launchBtn).width(170.0F).height(50.0F).row();
 
 this.main.add(wd001).size(10f);
 
 
-
+        this.main.add(argumentField).width(255F).height(50.0F).row();
         this.main.add(visibleBtn).width(25f).height(45f).right();
         this.main.add(directoryChooseF).width(500.0F).height(25.0F).row();
         this.scene.add(this.main);
-
        this.main.add(this.mainButtons);
         visibleBtn.clicked(()->{
            directoryChooseF.visible = directoryChooseF.visible  ? false : true;
@@ -468,7 +468,8 @@ arguments.add("-jar");
 arguments.add(jarPath);
 
 //new String[]{"java",  "-jar", jarPath
-            (new ProcessBuilder(arguments)).inheritIO().start();
+           var process =  new ProcessBuilder(arguments).inheritIO().start();
+
         } catch (IOException e) {
             Log.err("Start failed: ", e);
         }
@@ -478,8 +479,8 @@ arguments.add(jarPath);
     public static void main(String[] args) {
         SdlConfig config = new SdlConfig();
         config.title = "Singularity Launcher";
-        config.width = 900;
-        config.height = 350;
+        config.width = 800;
+        config.height = 400;
         config.fullscreen = false;
         config.resizable = true;
         config.decorated = false;
