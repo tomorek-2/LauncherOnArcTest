@@ -19,4 +19,4 @@
 ```
 ## License
 
-GPL v3 (in progress)
+GPL v3
