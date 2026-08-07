@@ -1,8 +1,6 @@
 
 package singlaunch;
 
-import com.sun.jdi.connect.Connector;
-
 import arc.ApplicationCore;
 import arc.Core;
 import arc.Files;
@@ -29,6 +27,7 @@ import arc.scene.ui.TextField;
 import arc.scene.ui.layout.Table;
 import arc.util.Log;
 import arc.util.Timer;
+import arc.util.pooling.Pool;
 import arc.util.viewport.ScreenViewport;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
@@ -43,6 +42,7 @@ import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import javax.imageio.ImageIO;
@@ -50,7 +50,7 @@ import javax.imageio.ImageIO;
 public class SingularityLauncher extends ApplicationCore {
     private static final String VERSIONS_DIR = "versions";
     Color ColorC = Color.valueOf("1e1e24");
-    private HashSet<Fi> jarFiles = new HashSet<>();
+    private HashMap<String, Fi> jarFiles = new HashMap<>();
     private Fi selectedJar;
     private Font titleFont;
     public static Font regularFont;
@@ -61,8 +61,14 @@ public class SingularityLauncher extends ApplicationCore {
     String pathVersions;
     String pathVersionsInput;
     Table listTable = new Table();
+    private Fi versionsDir;
     String[] urlsVersions;
+    int w;
+    int h;
     ArrayList<String> arguments = new ArrayList<String>();
+    private Pool<Fi> fiPool = new Pool<Fi>() { @Override protected Fi newObject() { return new Fi("");  } };
+    TextButton launchBtn;
+
     String argument =
             "-Xmx512M";
 
@@ -76,38 +82,42 @@ String urlDownloadLatest ="https://github.com/anuken/mindustry/releases/latest/d
        pathVersions = Core.files.local("").absolutePath().replace(System.getProperty("user.home"),  "");
 
         pathVersionsInput = System.getProperty("user.home") + pathVersions + "/" + VERSIONS_DIR;
+        this.versionsDir = Core.files.absolute(pathVersionsInput);
         Core.batch = new SpriteBatch();
         Draw.batch(Core.batch);
         this.scene = new Scene(new ScreenViewport());
         Core.scene = this.scene;
+
         FontsAWT.load();
         this.regularFont = FontsAWT.regular;
         Style.load();
-      //  this.titleFont = this.generateFont(48);
-      //  this.regularFont = this.generateFont(22);
+
         this.registerDefaultStyles();
 
         this.createUI();
+
+
         Core.input.addProcessor(this.scene);
 
         this.scanVersions();
     }
 
     public void update() {
-        int w = Core.graphics.getWidth();
-        int h = Core.graphics.getHeight();
-        if (w != 0 && h != 0) {
+         w =Core.graphics.getWidth();
+         h =Core.graphics.getHeight();
+       if (w != 0 && h != 0) {
             Core.graphics.clear(ColorC);
             if (this.scene != null) {
                 this.scene.getViewport().update(w, h, true);
                 this.scene.act();
                 this.scene.draw();
+              launchBtn.setDisabled(this.jarFiles.isEmpty());
                 if(Core.input.keyTap(KeyCode.enter)) {
                     if (this.selectedJar != null) {
                         this.launchMindustry(this.selectedJar.absolutePath());
                     }
                 }
-            }
+           }
 
 //scanVersions();
         }
@@ -148,18 +158,19 @@ Core.app.post(()->this.scanVersions());
 
     private void scanVersions() {
         this.jarFiles.clear();
-        Fi dir = Core.files.absolute(pathVersionsInput);
-        if (!dir.exists()) {
+if(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory() > 50 *1024*1024)System.gc();
+        if (!versionsDir.exists()) {
 
-            Log.info("versions directory wasn't created");
+     Log.info("versions directory wasn't created");
         }
 
-        Log.info("Scanning: " + dir.absolutePath());
+        Log.info("Scanning: " + versionsDir.absolutePath());
 
-        for(Fi file : dir.list()) {
+        for(Fi file: versionsDir.list()) {
             if (file.extEquals("jar")) {
-                this.jarFiles.add(file);
+                this.jarFiles.put(file.name(), file);
                 Log.info("Found: " + file.name());
+
             }
         }
 
@@ -173,6 +184,7 @@ Core.app.post(()->this.scanVersions());
         TextButton.TextButtonStyle remoteStyle = Style.remoteStyle;
         Label.LabelStyle regularLabelStyle = Style.regularLabelStyle;
         listTable.clear();
+listTable.getCells().clear();
        if(urlsVersions == null) this.getListUrl(urlDownoadList);
         if(urlsVersions != null) {
             for (String line : urlsVersions) {
@@ -180,11 +192,14 @@ Core.app.post(()->this.scanVersions());
                 if (line.length() > 32) {
 
                     String name = line.substring(0, 32).trim();
-                    if (!this.jarFiles.contains( new Fi(pathVersionsInput + "/" + name + ".jar"))) {
+
+                    if (!this.jarFiles.containsKey(name + ".jar")) {
                         String url = line.substring(32).trim();
 
                         TextButton btn = new TextButton("[WEB] " + name, remoteStyle);
-                        btn.clicked(() -> this.httpDownloadInFile(url, name + ".jar"));
+                        btn.clicked(() ->{ this.httpDownloadInFile(url, name + ".jar");
+
+                        if(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory() > 25 *1024*1024)System.gc();});
                         listTable.add(btn).width(360.0F).height(45.0F).fillX().pad(0.0F, 0.0F, 1.0F, 0.0F).row();
                     }
                 }
@@ -196,7 +211,7 @@ Core.app.post(()->this.scanVersions());
             listTable.add(new Label("Place .jar files in 'versions/' folder", regularLabelStyle)).row();
         } else {
 
-            for(Fi jar : this.jarFiles) {
+            for(Fi jar : this.jarFiles.values()) {
                 TextButton btn = new TextButton(jar.nameWithoutExtension(), versionStyle);
                 btn.clicked(() -> this.selectVersion(jar));
                 listTable.add(btn).width(360.0F).height(45.0F).fillX().pad(0.0F, 0.0F, 1.0F, 0.0F).row();
@@ -240,10 +255,9 @@ Core.app.post(()->this.scanVersions());
     private void createUI() {
 main.clear();
         this.scene.clear();
-      //  Color textColor = Color.valueOf("ffffff");
+
        Color bg = Color.valueOf("1e1e24");
         Drawable bgDrawable = this.solidDrawable(bg);
-      //  Color accent = Color.valueOf("f05d23");
 
      var regularLabelStyle= Style.regularLabelStyle;
 
@@ -264,8 +278,8 @@ var textFieldStyle = Style.textFieldStyle;
        this.selectedVersionLabel = new Label("Selected: None", regularLabelStyle);
         this.selectedVersionLabel.setColor(Color.lightGray);
 
+        launchBtn = new TextButton("LAUNCH", Style.launchStyle);
 
-        TextButton launchBtn = new TextButton("LAUNCH", launchStyle);
         TextButton downloadBtn = new TextButton("download", launchStyle);
         TextButton wd = new TextButton(" ", launchStyle);
 
@@ -283,14 +297,14 @@ var textFieldStyle = Style.textFieldStyle;
         wd001.setSize(25f, 25f);
 
         launchBtn.setDisabled(this.jarFiles.isEmpty());
-directoryChooseF.update(()->
+directoryChooseF.changed(()->
 {
-    launchBtn.setDisabled(this.jarFiles.isEmpty());
+
 
     pathVersionsInput = System.getProperty("user.home") + pathVersions + "/" + VERSIONS_DIR;
     pathVersions  = directoryChooseF.getText();
 
-
+this.versionsDir = Core.files.absolute(pathVersionsInput);
 });
 argumentField.changed(()->{
    argument = argumentField.getText();
@@ -299,10 +313,6 @@ argumentField.changed(()->{
 downloadBtn.clicked(()->{
    this.httpDownloadInFile(urlDownloadLatest, "LatestVersions.jar");
 });
-
-    //    this.main.add(argumentField).width(255F).height(50.0F).row();
-
-
 
 
         this.mainButtons.add(reloadBtn).size(170f, 50f);

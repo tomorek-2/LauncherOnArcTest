@@ -34,8 +34,6 @@ dependencies {
     implementation 'com.github.Anuken.Arc:arc-core:v159'
     implementation 'com.github.Anuken.Arc:backend-sdl:v159'
     implementation 'com.github.Anuken.Arc:natives-desktop:v159'
-    compileOnly files('/home/tomorek/AndroidSDK/build-tools/36.1.0/lib/d8.jar')
-   // compileOnly files('/home/tomorek/AndroidSDK/platforms/android-26/data/annotations.zip')
 
 
 }
