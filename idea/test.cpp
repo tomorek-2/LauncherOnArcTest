@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include "arcCpp/util/Log.hpp"
+#include "arcCpp/util/OS.hpp"
 class SdlTest {
     SDL_Window* sdlwin;
 public:  SDL_Window* Window() {
@@ -30,6 +31,7 @@ int xq = *xqe;
 int xqr;
 float rq = 0;
 arc::util::Log::log("Hello, World!");
+    arc::util::Log::log(arc::util::OS::isLinux() ? "OS: Linux" : arc::util::OS::isUnix() ? "OS: Unix" : "OS: Unknown");
     // ГЛАВНЫЙ ЦИКЛ (Game Loop)
     while (running) {
         // Проверяем события (чтобы окно не зависло)
