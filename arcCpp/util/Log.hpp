@@ -8,7 +8,7 @@ namespace arc::util {
     public:
 
         static void log(const std::string& str);
-    //    static void err(const std::string& str);
+
     };
 }
 

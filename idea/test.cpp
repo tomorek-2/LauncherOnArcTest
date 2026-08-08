@@ -11,7 +11,7 @@ public:  SDL_Window* Window() {
       SDL_DestroyWindow(sdlwin);
     }
 };
-
+//Это же свалка идей, скоро я почищу код от решения БЯМ.
 int main() {
     // 1. Инициализация
     if (SDL_Init(SDL_INIT_VIDEO) < 0) return 1;
