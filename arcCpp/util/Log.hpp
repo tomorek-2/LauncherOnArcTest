@@ -6,9 +6,12 @@
 namespace arc::util {
     class Log {
     public:
-
+static int logLevel;
         static void log(const std::string& str);
-
+static void warn(const std::string& str);
+static void debug(const std::string& str);
+static void err(const std::string& str);
+static void info(const std::string& str);
     };
 }
 

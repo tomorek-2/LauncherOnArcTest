@@ -31,6 +31,12 @@ int xq = *xqe;
 int xqr;
 float rq = 0;
 arc::util::Log::log("Hello, World!");
+arc::util::Log::warn("Warning!");
+arc::util::Log::logLevel = 4;
+arc::util::Log::log("if you see this, logLevel dont work");
+arc::util::Log::warn("if you see this, logLevel work");
+    arc::util::Log::info(std::string(" \033[91m") + "red");
+
     arc::util::Log::log(arc::util::OS::isLinux() ? "OS: Linux" : arc::util::OS::isUnix() ? "OS: Unix" : "OS: Unknown");
     // ГЛАВНЫЙ ЦИКЛ (Game Loop)
     while (running) {
