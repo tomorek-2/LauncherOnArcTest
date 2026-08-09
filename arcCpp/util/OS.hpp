@@ -9,6 +9,9 @@ namespace arc::util {
 
         static bool isLinux();
         static bool isUnix();
+        static std::string userHome();
+        static std::string username();
+        static std::string getPathUser();
     };
 }
 
