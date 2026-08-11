@@ -17,12 +17,14 @@ namespace arc::util {
                 std::cerr << str << "\n"<<"\033[39m"<< std::flush;
             }
         }
+
     void Log::err(const std::string &str) {
 
         if (arc::util::Log::logLevel >= 1) {
             std::cerr << str << "\n"<<"\033[39m"<< std::flush;
         }
     }
+
     void Log::debug(const std::string &str) {
 
         if (arc::util::Log::logLevel >= 3) {

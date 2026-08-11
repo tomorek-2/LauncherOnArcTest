@@ -40,7 +40,11 @@ arc::util::Log::info(arc::util::OS::userHome());
     arc::util::Log::info(arc::util::OS::username());
     arc::util::Log::info(arc::util::OS::getPathUser());
     arc::util::Log::log(arc::util::OS::isLinux() ? "OS: Linux" : arc::util::OS::isUnix() ? "OS: Unix" : "OS: Unknown");
+arc::util::Log::info(arc::util::OS::osName());
+arc::util::Log::info(arc::util::OS::osVersion());
+arc::util::Log::info(arc::util::OS::isArm() ? "OS: ARM" : arc::util::OS::isX64() ? "OS: X64" : "OS: Unknown");
     // ГЛАВНЫЙ ЦИКЛ (Game Loop)
+
     while (running) {
         // Проверяем события (чтобы окно не зависло)
         while (SDL_PollEvent(&event)) {

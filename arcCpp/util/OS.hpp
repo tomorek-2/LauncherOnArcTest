@@ -12,6 +12,10 @@ namespace arc::util {
         static std::string userHome();
         static std::string username();
         static std::string getPathUser();
+        static std::string osName();
+        static std::string osVersion();
+        static bool isArm();
+        static bool isX64();
     };
 }
 

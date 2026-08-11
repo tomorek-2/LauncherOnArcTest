@@ -1,8 +1,9 @@
 #include "OS.hpp"
 #include <unistd.h>
 #include <sys/types.h>
-//#include <stdlib.h>
+#include <sys/utsname.h>
 #include <pwd.h>
+#include <cstring>
 namespace arc::util {
     bool OS::isLinux() {
 #ifdef __linux__
@@ -50,5 +51,28 @@ namespace arc::util {
     if (ge == nullptr) return "   ";
     return ge;
 
-    };
+    }
+    std::string OS::osName() {
+        struct utsname buffer; if (uname(&buffer) != 0) return "";
+        return buffer.sysname;
+    }
+    std::string OS::osVersion() {
+        struct utsname buffer; if (uname(&buffer) != 0) return "";
+
+        return buffer.release;
+    }
+
+    bool OS::isArm() {
+        struct utsname buffer;
+
+        if (uname(&buffer) != 0) return false;
+   return strstr(buffer.machine, "arm");
+    }
+    bool OS::isX64() {
+        struct utsname buffer;
+
+        if (uname(&buffer) != 0) return false;
+       if (strstr(buffer.machine, "x86_64") || strstr(buffer.machine, "amd64")) return true;
+        return false;
+    }
 }
