@@ -18,7 +18,7 @@ namespace arc::util {
             }
         }
 
-    void Log::err(const std::string &str) {
+    void Log::err(const std::string_view &str) {
 
         if (arc::util::Log::logLevel >= 1) {
             std::cerr << str << "\n"<<"\033[39m"<< std::flush;
@@ -31,7 +31,8 @@ namespace arc::util {
             std::cerr << str << "\n"<<"\033[39m"<< std::flush;
         }
     }
-    void Log::info(const std::string &str) {
+
+    void Log::info(const std::string_view &str) {
 
         if (arc::util::Log::logLevel >= 4) {
 
@@ -39,4 +40,5 @@ namespace arc::util {
         }
 
     }
+
 }

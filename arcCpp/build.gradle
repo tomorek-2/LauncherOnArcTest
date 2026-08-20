@@ -1,0 +1,35 @@
+plugins {
+    id 'base'
+}
+
+
+tasks.register('compileApp', Exec) {
+    group = 'build'
+    description = 'Compiles the ArcCpp launcher using g++'
+
+    inputs.dir(projectDir)
+    inputs.dir(file("../idea"))
+    outputs.file(file("$projectDir/app"))
+
+    workingDir = projectDir
+    
+    commandLine 'sh', '-c', """
+        g++ -std=c++20 -I.. -I/usr/include/soloudh \\
+        ../idea/test.cpp util/Log.cpp util/OS.cpp audio/Soloud.cpp Events.cpp \\
+        -L. -lsoloud -lSDL2 -lasound -lpthread \\
+        -Wl,-rpath,. -o app
+    """
+}
+
+tasks.register('run', Exec) {
+    group = 'run'
+    description = 'Runs the compiled launcher'
+    dependsOn 'compileApp'
+    
+    workingDir = projectDir
+    commandLine './app'
+}
+
+tasks.named('assemble') {
+    dependsOn 'compileApp'
+}

@@ -6,6 +6,7 @@ pluginManagement {
 }
 
 rootProject.name = 'LauncherTest'
+include 'arcCpp'
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)

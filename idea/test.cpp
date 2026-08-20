@@ -2,6 +2,7 @@
 #include <iostream>
 #include "arcCpp/util/Log.hpp"
 #include "arcCpp/util/OS.hpp"
+#include "arcCpp/Events.hpp"
 class SdlTest {
     SDL_Window* sdlwin;
 public:  SDL_Window* Window() {
@@ -12,6 +13,7 @@ public:  SDL_Window* Window() {
       SDL_DestroyWindow(sdlwin);
     }
 };
+
 //Это же свалка идей, скоро я почищу код от решения БЯМ.
 int main() {
     // 1. Инициализация
@@ -40,9 +42,12 @@ arc::util::Log::info(arc::util::OS::userHome());
     arc::util::Log::info(arc::util::OS::username());
     arc::util::Log::info(arc::util::OS::getPathUser());
     arc::util::Log::log(arc::util::OS::isLinux() ? "OS: Linux" : arc::util::OS::isUnix() ? "OS: Unix" : "OS: Unknown");
-arc::util::Log::info(arc::util::OS::osName());
-arc::util::Log::info(arc::util::OS::osVersion());
-arc::util::Log::info(arc::util::OS::isArm() ? "OS: ARM" : arc::util::OS::isX64() ? "OS: X64" : "OS: Unknown");
+arc::util::Log::info(arc::util::OS::OSVersionArchitecture());
+arc::Events::on([](){
+    arc::util::Log::info(arc::util::OS::OSVersionArchitecture());
+}, "outputArchitecture");
+arc::Events::fire("outputArchitecture");
+//arc::util::Log::info(arc::util::OS::isArm() ? "OS: ARM " : arc::util::OS::isX64() ? "OS: X64 " + arc::util::OS::osVersion() : "OS: Unknown");
     // ГЛАВНЫЙ ЦИКЛ (Game Loop)
 
     while (running) {

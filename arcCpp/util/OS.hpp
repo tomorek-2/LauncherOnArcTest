@@ -16,6 +16,7 @@ namespace arc::util {
         static std::string osVersion();
         static bool isArm();
         static bool isX64();
+        static std::string OSVersionArchitecture();
     };
 }
 

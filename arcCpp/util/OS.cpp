@@ -75,4 +75,16 @@ namespace arc::util {
        if (strstr(buffer.machine, "x86_64") || strstr(buffer.machine, "amd64")) return true;
         return false;
     }
+    std::string OS::OSVersionArchitecture() {
+        struct utsname buffer;
+        uname(&buffer);
+
+        std::string resulttmp;
+        resulttmp.reserve(256);
+
+            resulttmp +=   buffer.sysname
+                    ;resulttmp+=buffer.version;resulttmp+=buffer.machine;
+        return resulttmp;
+    }
 }
+

@@ -1,0 +1,3 @@
+#ifndef ARC_AUDIO_SOLOUD_HPP
+#define ARC_AUDIO_SOLOUD_HPP
+
