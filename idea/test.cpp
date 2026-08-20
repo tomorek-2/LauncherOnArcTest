@@ -3,6 +3,7 @@
 #include "arcCpp/util/Log.hpp"
 #include "arcCpp/util/OS.hpp"
 #include "arcCpp/Events.hpp"
+#include "arcCpp/util/Threads.hpp"
 class SdlTest {
     SDL_Window* sdlwin;
 public:  SDL_Window* Window() {
@@ -46,7 +47,9 @@ arc::util::Log::info(arc::util::OS::OSVersionArchitecture());
 arc::Events::on([](){
     arc::util::Log::info(arc::util::OS::OSVersionArchitecture());
 }, "outputArchitecture");
-arc::Events::fire("outputArchitecture");
+arc::util::Threads::daemon("outputArchitecture", []() {
+    arc::Events::fire("outputArchitecture");
+});
 //arc::util::Log::info(arc::util::OS::isArm() ? "OS: ARM " : arc::util::OS::isX64() ? "OS: X64 " + arc::util::OS::osVersion() : "OS: Unknown");
     // ГЛАВНЫЙ ЦИКЛ (Game Loop)
 
