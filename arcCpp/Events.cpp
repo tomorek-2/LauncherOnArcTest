@@ -28,6 +28,7 @@ void Events::fire(std::string name) {
         i++;
     }
 };
+
 void Events::remove(std::string name) {
     int i = 0;
     for(std::string nameI : names) {
@@ -40,6 +41,8 @@ void Events::remove(std::string name) {
         }
         i++;
     }
+
+
 };
 }
 
