@@ -1,0 +1,18 @@
+Checks: >
+  -*,
+  bugprone-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  cppcoreguidelines-*,
+  google-*,
+  clang-diagnostic-*,
+  clang-analyzer-*
+
+WarningsAsErrors: '*'
+HeaderFilterRegex: 'arcCpp/.*'
+CheckOptions:
+  - key:             modernize-use-auto.MinTypeNameLength
+    value:           '5'
+  - key:             modernize-loop-convert.MaxCopySize
+    value:           '16'

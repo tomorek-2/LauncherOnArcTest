@@ -51,6 +51,7 @@ arc::Events::fire("outputArchitecture");
     // ГЛАВНЫЙ ЦИКЛ (Game Loop)
 
     while (running) {
+
         // Проверяем события (чтобы окно не зависло)
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) running = false;
