@@ -1,0 +1,54 @@
+//#include "Seq.hpp"
+#include <string>
+
+namespace arc::structures {
+    template <typename T>
+    T items[500];
+    int* freeSpace = new int(0);
+    template <typename T>
+    bool Seq<T>::contains(T itemC) {
+for(T item : items) {
+    if(itemC == item) return true;
+}
+return false;
+
+
+};
+
+
+    template <typename T>
+void Seq<T>::resize(int newSize) {
+    T newItems[items.length * 2];
+    delete[] items;
+    items = newItems;
+freeSpace = items.length + 1;
+};
+    template <typename T>
+void Seq<T>::add(T item) {
+    while(true) {
+if(!items[freeSpace]) {
+    items[freeSpace] = item;
+    freeSpace++;
+    return;
+} else {
+    freeSpace++;
+
+}
+}
+};
+    template <typename T>
+    int Seq<T>::get(T key) {
+        int i = 0;
+        for(T item : items) {
+
+
+            if(key == item) return i++;
+        i++;
+        }
+
+        return 0;
+
+
+
+    };
+}
