@@ -15,7 +15,7 @@ tasks.register('compileApp', Exec) {
     
     commandLine 'sh', '-c', """
         g++ -std=c++20 -I.. -I/usr/include/soloudh \\
-        ../idea/test.cpp util/Log.cpp util/OS.cpp audio/Soloud.cpp Events.cpp util/Threads.cpp \\
+        ../idea/test.cpp util/Log.cpp util/OS.cpp audio/Soloud.cpp Events.cpp util/Threads.cpp struct/Seq.cpp \\
         -L. -lsoloud -lSDL2 -lasound -lpthread \\
         -Wl,-rpath,. -o app
     """
