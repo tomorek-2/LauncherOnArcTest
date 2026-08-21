@@ -69,7 +69,10 @@ namespace arc::structures {
 
 
         };
-
+~Seq() {
+  delete[] items;
+items = nullptr;
+};
 
     };
 
