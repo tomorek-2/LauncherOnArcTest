@@ -2,16 +2,17 @@
 #define ARC_EVENTS_HPP
 #include <functional>
 #include <string>
+#include "arcCpp/struct/ObjectMap.hpp"
 namespace arc {
     class Events {
 
     public:
       static  void on(const std::function<void()>& callbackF, std::string);
-       static std::function<void()> events[500];
+      static  arc::structures::ObjectMap<std::string, std::function<void()>> eventsMa;
         static void fire(std::string name);
 static void remove(std::string name);
     private:
-       static std::string names[500];
+
         Events() = delete;
         ~Events() = delete;
 

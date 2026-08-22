@@ -59,7 +59,7 @@ arc::util::Threads::daemon("outputArchitecture", []() {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) running = false;
         }
-
+for()
         // --- Отрисовка начинается здесь ---
 
         // А. Очищаем экран (заливаем черным цветом)
