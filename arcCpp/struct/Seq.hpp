@@ -11,6 +11,7 @@ namespace arc::structures {
 
         T* items = nullptr;
         int freeSpace = 0;
+        int totalSpace = 0;
         bool contains(T itemC) {
             if(items == nullptr) createArray(length);
             for(T item : items) {
@@ -22,6 +23,7 @@ namespace arc::structures {
         };
 
         void add(T item)  {
+            totalSpace++;
             if(items == nullptr) createArray(length);
             while(true) {
                 if(freeSpace >= length) {
@@ -35,7 +37,9 @@ namespace arc::structures {
 
             }
         };
+
         T get(int key)  {
+
             while(true) {
 
                 if (items == nullptr) {createArray(length);}
@@ -60,19 +64,43 @@ namespace arc::structures {
 
 
          };
-    private:
+         void remove(int index) {
+             totalSpace--;
+             if(items == nullptr) createArray(length);
+
+             items[index] = items[freeSpace];
+         };
+         void remove(T item) {
+             totalSpace--;
+             for(int i = 0; i < length; i++) {
+               if(item == items[i]) {
+                   freeSpace = i;
+                   return;
+               }
+           }
+             return;
+         };
+        ~Seq() {
+            delete[] items;
+            items = nullptr;
+        };
+        void clear() {
+            delete[] items;
+            items = nullptr;
+        };
+
         void createArray(int size) {
           T* newItems = new T[size];
+          for(int i = 0; i < freeSpace; i++) {
+              newItems[i] = items[i];
+          }
           delete[] items;
           items = newItems;
           freeSpace = 0;
 
 
         };
-~Seq() {
-  delete[] items;
-items = nullptr;
-};
+
 
     };
 
