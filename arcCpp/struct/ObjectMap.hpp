@@ -2,7 +2,7 @@
 #define ARC_STRUCTURES_OBJECTMAP_HPP
 #include <functional>
 #include <span>
-
+#include "arcCpp/util/Threads.hpp"
 
 
 namespace arc::structures {
@@ -12,7 +12,7 @@ namespace arc::structures {
         K *key = nullptr;
         V *value = nullptr;
         bool *freeSpace = nullptr;
-        int length = 500;
+        int length = 405;
     public:
         void resize(int size) {
 
@@ -26,6 +26,7 @@ namespace arc::structures {
                 freeSpace = newSpace;
                 for(int i = 0; i < size; i++) freeSpace[i] = true;
             } else {
+
                 K *newKey = new K[size];
                 V *newValue = new V[size];
                 bool *newSpace = new bool[size];
@@ -39,20 +40,17 @@ namespace arc::structures {
                 for (K item: std::span<K>(key, length)) {
 
                     std::hash <K> hash;
-                    int keyHash = hash(item) % length;
+                    int keyHash = hash(item) % size;
 
                     if (freeSpace[keyHash]) {
-                        newKey[keyHash] = key[keyHash];
-                        newValue[keyHash] = value[keyHash];
-                        freeSpace[keyHash] = false;
-
+                        if (size < length) {
+                            newKey[keyHash] = key[keyHash];
+                            newValue[keyHash] = value[keyHash];
+                            freeSpace[keyHash] = false;
+                            return;
+                        }
                     } else {
                         keyHash++;
-                        if (keyHash >= length) {
-                            resize(length * 2);
-                            keyHash = 0;
-
-                        }
 
 
                     }
@@ -65,10 +63,11 @@ namespace arc::structures {
                 value = newValue;
                 delete[] freeSpace;
                 freeSpace = newSpace;
+                length = size;
             }
 
 
-            length = size;
+
         };
 
         void put(K keyP, V valueP) {
@@ -78,6 +77,7 @@ bool existsIsKey = false;
 std::hash <K> hash;
             if (keyP == key[hash(keyP) % length]) existsIsKey = true;
                 int keyHash = hash(keyP) % length;
+
             while (true) {
                 if (freeSpace[keyHash]) {
                     key[keyHash] = keyP;
@@ -86,7 +86,8 @@ std::hash <K> hash;
                     return;
                 } else {
                     keyHash++;
-                    if (keyHash >= length) {
+
+                    if (keyHash > length) {
                         resize(length * 2);
                         keyHash = hash(keyP) % length;
 
@@ -124,7 +125,7 @@ std::hash <K> hash;
                     freeSpace[keyHash] = true;
                     return;
                 } else {
-                    if(keyHash > length) return;
+                    if(keyHash > length* 0.8) return;
                     keyHash++;
                 }
             }
