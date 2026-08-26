@@ -13,7 +13,9 @@ void Events::on(const std::function<void()>& callbackF, std::string name) {
 eventsMa.put(name, callbackF);
 
     return;
+
 };
+
 void Events::fire(std::string name) {
 auto event = eventsMa.get(name);
 event();

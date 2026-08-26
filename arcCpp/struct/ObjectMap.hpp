@@ -31,32 +31,27 @@ namespace arc::structures {
                 V *newValue = new V[size];
                 bool *newSpace = new bool[size];
                 int i2 = 0;
-                for(bool space : std::span<bool>(freeSpace, length)) {
-                    newSpace[i2] = freeSpace[i2];
+                for(bool space : std::span<bool>(newSpace, length)) {
+                    newSpace[i2] = true;
                     i2++;
                 }
+                i2 = 0;
+
                 int i = 0;
 
-                for (K item: std::span<K>(key, length)) {
+while(true) {
+    if(i >= length) break;
 
-                    std::hash <K> hash;
-                    int keyHash = hash(item) % size;
+    std::hash <K> hash;
+    int keyHash = hash(key[i]) % size;
+    if(!freeSpace[keyHash]) {
+        newKey[keyHash] = key[i];
+        newValue[keyHash] = value[i];
+        newSpace[keyHash] = false;
+    }
+    i++;
+}
 
-                    if (freeSpace[keyHash]) {
-                        if (size < length) {
-                            newKey[keyHash] = key[keyHash];
-                            newValue[keyHash] = value[keyHash];
-                            freeSpace[keyHash] = false;
-                            return;
-                        }
-                    } else {
-                        keyHash++;
-
-
-                    }
-
-
-                }
                 delete[] key;
                 key = newKey;
                 delete[] value;
@@ -79,26 +74,34 @@ std::hash <K> hash;
                 int keyHash = hash(keyP) % length;
 
             while (true) {
+                if (keyP == key[hash(keyP) % length]) return;
                 if (freeSpace[keyHash]) {
                     key[keyHash] = keyP;
                     value[keyHash] = valueP;
                     freeSpace[keyHash] = false;
+
                     return;
+
                 } else {
                     keyHash++;
+
 
                     if (keyHash > length) {
                         resize(length * 2);
                         keyHash = hash(keyP) % length;
+
 
                     }
 
 
                 }
 
+
             }
 
+return;
         };
+
 
         V get(K keyP) {
             if(key == nullptr) resize(length);
@@ -127,8 +130,16 @@ std::hash <K> hash;
                 } else {
                     if(keyHash > length* 0.8) return;
                     keyHash++;
+
+
                 }
+
+
             }
+
+
+
+
     };
 
 ~ObjectMap() {

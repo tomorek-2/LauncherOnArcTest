@@ -14,7 +14,7 @@ tasks.register('compileApp', Exec) {
     workingDir = projectDir
 
     commandLine 'sh', '-c', """
-    ulimit -v 980000 && \\
+    ulimit -v 990000 && \\
     g++ -std=c++20 -I.. -I/usr/include/soloudh \\
     ../idea/test.cpp util/Log.cpp util/OS.cpp audio/Soloud.cpp Events.cpp util/Threads.cpp \\
     -L. -lsoloud -lSDL2 -lasound -lpthread \\
