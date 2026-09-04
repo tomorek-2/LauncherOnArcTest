@@ -33,8 +33,8 @@ namespace arc::structures {
                 int i2 = 0;
                 for(int i3 = 0; i3 < size; i3++) {
                     newSpace[i3] = true;
-                    newKey[i3] = K{};
-                    newValue[i3] = V{};
+                //    newKey[i3] = K{};
+                  //  newValue[i3] = V{};
                 }
                 for(bool space : std::span<bool>(freeSpace, length)) {
                     newSpace[i2] = freeSpace[i2];
@@ -80,9 +80,25 @@ if(key == nullptr) resize(length);
 if(value == nullptr) resize(length);
 bool existsIsKey = false;
 std::hash <K> hash;
+int i4 = 0;
+            int keyHash = hash(keyP) % length;
+while(true) {
+    if(i4 >= length) break;
+
+    if(keyHash >= length) break;
+     if(key[keyHash] == keyP) {
+         value[keyHash] = valueP;
+         return;
+
+     }
+
+     keyHash++;
+
+
+}
             if (keyP == key[hash(keyP) % length]) existsIsKey = true;
 
-                int keyHash = hash(keyP) % length;
+                keyHash = hash(keyP) % length;
 
 if(existsIsKey) {
     value[keyHash] = valueP;

@@ -25,7 +25,7 @@ int main() {
 SdlTest* sdltest = new SdlTest();
 SDL_Window* window = sdltest->Window();
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED  /* SDL_RENDERER_PRESENTVSYNC */);
 
     bool running = true;
     SDL_Event event;
