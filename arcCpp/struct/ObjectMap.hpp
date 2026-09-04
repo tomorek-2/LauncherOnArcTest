@@ -101,6 +101,11 @@ if(existsIsKey) {
                     freeSpace[keyHash] = false;
                     return;
                 } else {
+                    if(key[keyHash] == keyP) {
+                        value[keyHash] = valueP;
+                        return;
+
+                    }
                     keyHash++;
 
                     if (keyHash > length) {
