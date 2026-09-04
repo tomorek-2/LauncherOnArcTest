@@ -7,9 +7,10 @@ AGENTS.md
 /cache/
 local.properties
 assets/SingularityLauncher.zip
-
 /.profileconfig.json
 /profile.jfr
 /hs_err_pid42615.log
 /versionsLatestVersions.zip
 /app
+versions/
+MindustryV158.1.jar

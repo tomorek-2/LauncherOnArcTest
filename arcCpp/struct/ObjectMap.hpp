@@ -35,34 +35,31 @@ namespace arc::structures {
                     newSpace[i2] = freeSpace[i2];
                     i2++;
                 }
+
+
                 int i = 0;
+std::hash <K> hash;
 
-                for (K item: std::span<K>(key, length)) {
+while(true) {
+if(i < length) {
+if(!freeSpace[i]) {
+int keyHash = hash(key[i]) % size; // length или size? 
+newKey[keyHash] = key[i];
+newValue[keyHash] = value[i];
+newSpace[keyHash] = false;
+i++;
+}
+} else break;
 
-                    std::hash <K> hash;
-                    int keyHash = hash(item) % size;
-
-                    if (freeSpace[keyHash]) {
-                        if (size < length) {
-                            newKey[keyHash] = key[keyHash];
-                            newValue[keyHash] = value[keyHash];
-                            freeSpace[keyHash] = false;
-                            return;
-                        }
-                    } else {
-                        keyHash++;
-
-
-                    }
-
-
-                }
-                delete[] key;
+}
+             
+   delete[] key;
                 key = newKey;
                 delete[] value;
                 value = newValue;
                 delete[] freeSpace;
                 freeSpace = newSpace;
+
                 length = size;
             }
 
