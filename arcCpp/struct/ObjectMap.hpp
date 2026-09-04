@@ -60,7 +60,7 @@ if(i < length) {
     } else break;
 } else break;
 }
-             
+
    delete[] key;
                 key = newKey;
                 delete[] value;
@@ -101,7 +101,6 @@ if(existsIsKey) {
                     freeSpace[keyHash] = false;
                     return;
                 } else {
-if(key[keyHash] == keyP) return;
                     keyHash++;
 
                     if (keyHash > length) {
@@ -146,6 +145,8 @@ if(key[keyHash] == keyP) return;
                     if(keyHash > length* 0.8) return;
                     keyHash++;
                 }
+
+
             }
     };
 

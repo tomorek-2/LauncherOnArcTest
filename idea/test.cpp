@@ -35,6 +35,7 @@ int xqr;
 float rq = 0;
 int orderChar = 0;
 bool orderTwoI = false;
+bool orderThreeI = false;
 char charTest = 0;
 static int numberI = 0;
 arc::util::Log::log("Hello, World!");
@@ -63,8 +64,11 @@ if(orderChar > 255) {
     orderChar = 0;
     orderTwoI = !orderTwoI;
 }
+if(orderTwoI && orderChar > 255) orderThreeI = true;
 if(orderTwoI) {
     charTest = 256 + orderChar;
+} else if (orderThreeI) {
+    charTest = 256 + 256 + orderChar;
 } else charTest = orderChar;
         // Проверяем события (чтобы окно не зависло)
         while (SDL_PollEvent(&event)) {
@@ -74,13 +78,13 @@ if(orderTwoI) {
         numberI++;
 
 arc::Events::on([numberI](){
-
-    arc::util::Log::info(arc::util::OS::OSVersionArchitecture());
-    arc::util::Log::info(std::to_string(numberI));
+auto log = arc::util::OS::OSVersionArchitecture() + std::to_string(numberI);
+    arc::util::Log::info(log);
+ //   arc::util::Log::info(std::to_string(numberI));
 }, std::to_string(*" ") + charTest);
 arc::Events::fire(std::to_string(*" ") + charTest);
         // --- Отрисовка начинается здесь ---
-
+arc::util::Log::info(std::to_string(*" ") + std::to_string(numberI));
         // А. Очищаем экран (заливаем черным цветом)
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0); // R, G, B, A
         SDL_RenderClear(renderer);
