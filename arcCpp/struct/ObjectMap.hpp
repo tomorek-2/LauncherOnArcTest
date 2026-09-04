@@ -2,7 +2,7 @@
 #define ARC_STRUCTURES_OBJECTMAP_HPP
 #include <functional>
 #include <span>
-#include "arcCpp/util/Threads.hpp"
+#include "arcCpp/util/Log.hpp"
 
 
 namespace arc::structures {
@@ -31,6 +31,11 @@ namespace arc::structures {
                 V *newValue = new V[size];
                 bool *newSpace = new bool[size];
                 int i2 = 0;
+                for(int i3 = 0; i3 < size; i3++) {
+                    newSpace[i3] = true;
+                    newKey[i3] = K{};
+                    newValue[i3] = V{};
+                }
                 for(bool space : std::span<bool>(freeSpace, length)) {
                     newSpace[i2] = freeSpace[i2];
                     i2++;
@@ -42,15 +47,18 @@ std::hash <K> hash;
 
 while(true) {
 if(i < length) {
-if(!freeSpace[i]) {
-int keyHash = hash(key[i]) % size; // length или size? 
-newKey[keyHash] = key[i];
-newValue[keyHash] = value[i];
-newSpace[keyHash] = false;
-i++;
-}
-} else break;
+    if (hash(key[i]) % length < length) {
+        if (!freeSpace[i]) {
 
+            int keyHash = hash(key[i]) % size;
+            newKey[keyHash] = key[i];
+            newValue[keyHash] = value[i];
+            newSpace[keyHash] = false;
+            i++;
+            arc::util::Log::info("58, код успешно отработал");
+        } else i++;
+    } else break;
+} else break;
 }
              
    delete[] key;
@@ -73,15 +81,27 @@ if(value == nullptr) resize(length);
 bool existsIsKey = false;
 std::hash <K> hash;
             if (keyP == key[hash(keyP) % length]) existsIsKey = true;
+
                 int keyHash = hash(keyP) % length;
 
+if(existsIsKey) {
+    value[keyHash] = valueP;
+    return;
+
+}
             while (true) {
+                if(keyHash > length) {
+                    resize(length * 2);
+                    keyHash = hash(keyP) % length;
+                }
+                if(keyHash > (length - 1)) break;
                 if (freeSpace[keyHash]) {
                     key[keyHash] = keyP;
                     value[keyHash] = valueP;
                     freeSpace[keyHash] = false;
                     return;
                 } else {
+if(key[keyHash] == keyP) return;
                     keyHash++;
 
                     if (keyHash > length) {
@@ -104,6 +124,7 @@ std::hash <K> hash;
 
             int keyHash = hash(keyP) % length;
             while (true) {
+                if(keyHash > length) return V{};
                 if (keyP== key[keyHash]) {
                     return value[keyHash];
                 } else {
