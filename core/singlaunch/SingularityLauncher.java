@@ -68,10 +68,10 @@ public class SingularityLauncher extends ApplicationCore {
     ArrayList<String> arguments = new ArrayList<String>();
     private Pool<Fi> fiPool = new Pool<Fi>() { @Override protected Fi newObject() { return new Fi("");  } };
     TextButton launchBtn;
-
+Process process;
     String argument =
             "-Xmx512M";
-
+boolean isLinux;
     String urlDownoadList = "https://raw.githubusercontent.com/tomorek-2/LauncherOnArcTest/refs/heads/main/urlVersions.json";
 String urlDownloadLatest ="https://github.com/anuken/mindustry/releases/latest/download/Mindustry.jar";
     public SingularityLauncher() {
@@ -98,7 +98,8 @@ String urlDownloadLatest ="https://github.com/anuken/mindustry/releases/latest/d
 
 
         Core.input.addProcessor(this.scene);
-
+        String osName = System.getProperty("os.name").toLowerCase();
+         isLinux = osName.contains("nix") || osName.contains("nux") || osName.contains("aix");
         this.scanVersions();
     }
 
@@ -120,7 +121,26 @@ String urlDownloadLatest ="https://github.com/anuken/mindustry/releases/latest/d
            }
 
 //scanVersions();
-        }
+
+
+           if (isLinux) {
+               if(process != null) {
+               Fi file = arc.files.Fi.get("/dev/shm/.mindustry_restart_flag");
+               if (file.exists()) {
+                   byte[] bytes = file.readBytes();
+                   if (bytes.length > 0 && bytes[0] == 1) {
+                       byte[] bytesw = new byte[]{0};
+
+                       process.destroy();
+                       if(process.isAlive()) process.destroyForcibly();
+                       this.launchMindustry(this.selectedJar.absolutePath());
+                       file.writeBytes(bytesw);
+                   }
+               }
+
+               }
+           }
+       }
 
     }
 public void getListUrl(String url) {
@@ -377,7 +397,7 @@ arguments.add("-jar");
 arguments.add(jarPath);
 
 //new String[]{"java",  "-jar", jarPath
-           var process =  new ProcessBuilder(arguments).inheritIO().start();
+            process =  new ProcessBuilder(arguments).inheritIO().start();
 
         } catch (IOException e) {
             Log.err("Start failed: ", e);

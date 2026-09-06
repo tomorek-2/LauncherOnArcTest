@@ -33,8 +33,9 @@ namespace arc::structures {
                 int i2 = 0;
                 for(int i3 = 0; i3 < size; i3++) {
                     newSpace[i3] = true;
-                //    newKey[i3] = K{};
-                  //  newValue[i3] = V{};
+
+
+
                 }
                 for(bool space : std::span<bool>(freeSpace, length)) {
                     newSpace[i2] = freeSpace[i2];
@@ -55,13 +56,13 @@ if(i < length) {
             newValue[keyHash] = value[i];
             newSpace[keyHash] = false;
             i++;
-            arc::util::Log::info("58, код успешно отработал");
+
         } else i++;
     } else break;
 } else break;
 }
 
-   delete[] key;
+                delete[] key;
                 key = newKey;
                 delete[] value;
                 value = newValue;

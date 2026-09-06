@@ -96,7 +96,7 @@ namespace arc::structures {
           }
           delete[] items;
           items = newItems;
-          freeSpace = 0;
+          
 
 
         };
