@@ -13,7 +13,9 @@ namespace arc::structures {
         V *value = nullptr;
         bool *freeSpace = nullptr;
         int length = 405;
+
     public:
+        bool replace = false;
         void resize(int size) {
 
 
@@ -85,7 +87,7 @@ int i4 = 0;
             int keyHash = hash(keyP) % length;
 while(true) {
     if(i4 >= length) break;
-
+if(replace) break;
     if(keyHash >= length) break;
      if(key[keyHash] == keyP) {
          value[keyHash] = valueP;
@@ -97,15 +99,15 @@ while(true) {
 
 
 }
-            if (keyP == key[hash(keyP) % length]) existsIsKey = true;
+           // if (keyP == key[hash(keyP) % length]) existsIsKey = true;
 
                 keyHash = hash(keyP) % length;
-
+/*
 if(existsIsKey) {
     value[keyHash] = valueP;
     return;
 
-}
+} */
             while (true) {
                 if(keyHash > length) {
                     resize(length * 2);
