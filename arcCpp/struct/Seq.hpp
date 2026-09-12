@@ -10,12 +10,13 @@ namespace arc::structures {
 
 
         T* items = nullptr;
-        int freeSpace = 0;
+        bool* freeSpace = nullptr;
+        int freeSpaceI = 0;
         int totalSpace = 0;
         bool contains(T itemC) {
             if(items == nullptr) createArray(length);
-            for(T item : items) {
-                if(itemC == item) return true;
+            for(int i = 0; i < length; i++) {
+                if(itemC == items[i]) return true;
             }
             return false;
 
@@ -26,12 +27,12 @@ namespace arc::structures {
             totalSpace++;
             if(items == nullptr) createArray(length);
             while(true) {
-                if(freeSpace >= length) {
+                if(totalSpace >= length) {
                     length *= 2;
                     createArray(length);
                 }
-                items[freeSpace] = item;
-                freeSpace++;
+                items[freeSpaceI] = item;
+                freeSpaceI++;
                 return;
 
 
@@ -55,7 +56,7 @@ namespace arc::structures {
              for(T item : items) {
 
 
-                 if(key == item) return i++;
+                 if(key == item) return i;
                  i++;
              }
 
@@ -87,16 +88,34 @@ namespace arc::structures {
         void clear() {
             delete[] items;
             items = nullptr;
+            freeSpace = nullptr;
+            totalSpace = 0;
+            freeSpaceI = 0;
+            length = 500;
+            createArray(length);
         };
 
         void createArray(int size) {
           T* newItems = new T[size];
-          for(int i = 0; i < freeSpace; i++) {
-              newItems[i] = items[i];
+            bool* newSpace = new bool[size];
+
+
+          if(freeSpace != nullptr) {
+              for(int i = 0; i < length; i++) {
+                  newItems[i] = items[i];
+                  newSpace[i] = freeSpace[i];
+              }
+              delete[] items;
+              delete[] freeSpace;
+              items = newItems;
+              freeSpace = newSpace;
+          } else {
+              for(int i = 0; i < size; i++){
+                  newSpace[i] = true;
+              }
+              items = newItems;
+              freeSpace = newSpace;
           }
-          delete[] items;
-          items = newItems;
-          
 
 
         };

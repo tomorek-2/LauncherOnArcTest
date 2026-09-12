@@ -26,6 +26,7 @@ import arc.scene.ui.TextButton;
 import arc.scene.ui.TextField;
 import arc.scene.ui.layout.Table;
 import arc.util.Log;
+import arc.util.Nullable;
 import arc.util.Timer;
 import arc.util.pooling.Pool;
 import arc.util.viewport.ScreenViewport;
@@ -86,7 +87,7 @@ String urlDownloadLatest ="https://github.com/anuken/mindustry/releases/latest/d
         Core.batch = new SpriteBatch();
         Draw.batch(Core.batch);
         this.scene = new Scene(new ScreenViewport());
-        Core.scene = this.scene;
+//        Core.scene = this.scene;
 
         FontsAWT.load();
         this.regularFont = FontsAWT.regular;
@@ -107,17 +108,17 @@ String urlDownloadLatest ="https://github.com/anuken/mindustry/releases/latest/d
          w =Core.graphics.getWidth();
          h =Core.graphics.getHeight();
        if (w != 0 && h != 0) {
-            Core.graphics.clear(ColorC);
-            if (this.scene != null) {
-                this.scene.getViewport().update(w, h, true);
-                this.scene.act();
-                this.scene.draw();
-              launchBtn.setDisabled(this.jarFiles.isEmpty());
-                if(Core.input.keyTap(KeyCode.enter)) {
-                    if (this.selectedJar != null) {
-                        this.launchMindustry(this.selectedJar.absolutePath());
-                    }
-                }
+           Core.graphics.clear(ColorC);
+           if (this.scene != null) {
+               this.scene.getViewport().update(w, h, true);
+               this.scene.act();
+               this.scene.draw();
+               launchBtn.setDisabled(this.jarFiles.isEmpty());
+               if (Core.input.keyTap(KeyCode.enter)) {
+                   if (this.selectedJar != null) {
+                       this.launchMindustry(this.selectedJar.absolutePath());
+                   }
+               }
            }
 
 //scanVersions();

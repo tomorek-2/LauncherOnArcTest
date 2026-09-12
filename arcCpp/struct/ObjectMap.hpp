@@ -87,7 +87,7 @@ int i4 = 0;
             int keyHash = hash(keyP) % length;
 while(true) {
     if(i4 >= length) break;
-if(replace) break;
+if(!replace) break;
     if(keyHash >= length) break;
      if(key[keyHash] == keyP) {
          value[keyHash] = valueP;
@@ -96,7 +96,7 @@ if(replace) break;
      }
 
      keyHash++;
-
+i4++;
 
 }
            // if (keyP == key[hash(keyP) % length]) existsIsKey = true;

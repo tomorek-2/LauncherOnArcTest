@@ -2,30 +2,62 @@
 
 #include "arcCpp/util/Log.hpp"
 #include "arcCpp/struct/ObjectMap.hpp"
+#include "arcCpp/struct/Seq.hpp"
 #include <sstream>
 #include <functional>
-
+#include <iostream>
 #include <charconv>
+#include <unistd.h>
 static  arc::structures::ObjectMap<std::string, std::function<void(const std::string&)>> OQmap;
 static arc::structures::ObjectMap<std::string, double> doubleMap;
+static arc::structures::Seq<std::string> seq; //Команды.
+static int stepCounter = 0;
 class parser {
 public:
 
     void init() {
+
         doubleMap.replace = true;
 OQmap.put("print", [](std::string result2) {
+    const char* bytes = result2.c_str();
+std::string result2A;
+auto b = bytes[0];
+int l = 0;
+bool isString = true;
+for(int i = 0; i < result2.length(); i++) {
+
+    
+    b = bytes[i];
+if(b == 34) {
+    l++;
+} else    result2A += b;
+if(l == 2) {
+    isString = false;
+    break;
+}
+
+}
+if(!isString) {
+    result2 = std::to_string(doubleMap.get(result2A));
+} else result2 = result2A;
+
  arc::util::Log::info(result2);
 });
+
+
+
         OQmap.put("set", [](std::string inputResult) {
             std::string result = "";
             std::string result2 = "";
-            int i = 1;
+            int i = 0;
+         //   arc::util::Log::warn("inputResult"+inputResult);
             const char* bytes = inputResult.c_str();
             for(int l = 0; i < inputResult.length(); i++) {
 
                 auto b = bytes[i];
 
                 if (b == 32) {
+
                    i++;
                     result = inputResult.substr(0, l);
                     break;
@@ -41,7 +73,7 @@ OQmap.put("print", [](std::string result2) {
 
             for( int w = 0; i < inputResult.length(); i++) {
                 auto b = bytes[i];
-                result2 += b;
+              //  result2 += b;
                 if(bytes[i] == 34) {
                     result2 = std::to_string(doubleMap.get(result2));
                     break;
@@ -49,7 +81,11 @@ OQmap.put("print", [](std::string result2) {
                 if (b == 10) {
                     break;
                 }
+                result2 += b;
+
             }
+
+
             if(result2 == "") {
                 arc::util::Log::warn("Введён неверный аргумент. 48" + result2);
                 return;
@@ -59,8 +95,16 @@ double vaw = 0.0;
     auto [ptr, ec] = std::from_chars(result2.data(), result2.data() + result2.size(), vaw);
 
 
-    if( (ec == std::errc{}) && (ptr == result2.data() + result2.size()))
-   doubleMap.put(result, vaw);
+    if( (ec == std::errc{}) && (ptr == result2.data() + result2.size())) {
+   /*  arc::util::Log::warn(result);
+        arc::util::Log::warn(result2);
+        arc::util::Log::warn(std::to_string(vaw)); */
+   if(result == "@counter") {
+       stepCounter = (int)vaw;
+   }
+   //arc::util::Log::warn(" запись в карту идёт" +  result + "#");
+        doubleMap.put(result, vaw);
+    } else      arc::util::Log::warn("66 строка ошибка");
     return;
 }
 
@@ -68,6 +112,20 @@ double vaw = 0.0;
             return;
         });
     };
+    void start() {
+        for(int w = 0; stepCounter < seq.totalSpace; w) {
+            std::string tmpString = "";
+            tmpString = seq.get(stepCounter);
+            if(tmpString != "") exec(tmpString);
+            stepCounter++;
+        }
+        stepCounter = 0;
+    }
+    void add(std::string line) {
+        if(line != "") {
+            seq.add(line);
+        }
+    }
 void exec(std::string lines) {
     std::string result = "";
     std::string result2 = "";
@@ -77,15 +135,15 @@ void exec(std::string lines) {
 for(int l = 0; i < lines.length(); i++) {
 
     auto b = bytes[i];
-    result += b;
     if (b == 32) {
-
+i++;
 
 result = lines.substr(0, l);
         break;
     }
     l++;
 
+    result += b;
 }
 
     if(result == "") {
@@ -97,15 +155,12 @@ result = lines.substr(0, l);
 
         auto b = bytes[i];
 
-        if(bytes[i] == 34) {
-            result2 = std::to_string(doubleMap.get(result2));
-            break;
-        }
-        result2 += b;
+
+
         if (b == 10) {
             break;
         }
-
+        result2 += b;
     }
     if(result2 == "") {
         arc::util::Log::warn("Введён неверный аргумент." + result2);
@@ -127,15 +182,39 @@ return;
 
 
 int main() {
-arc::util::Log::log("Парсер начинает работу");
+std::string command = "";
+arc::util::Log::log("Парсер начинает работу, введите код");
+   // std::getline(std::cin, command);
+
 std::string line;
 parser p;
 p.init();
+while(true) {
+    arc::util::Log::log("<MLog>");
 
+while(true) {
+    std::getline(std::cin, line);
+    if(line == "#") break;
+    if(line != "") {
+        if(line == "start") {
+            p.start();
+            seq.clear();
+            break;
+        }
+        p.add(line);
+    } else
+    sleep(  0.01);
+
+}
+
+//p.exec("print ww");
+
+}
+/*
 p.exec(R"(set w 0.01)");
     p.exec(R"(print "w)");
 p.exec("set w 2");
     p.exec(R"(print "w)");
-
+*/
     return 0;
 }
