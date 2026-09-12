@@ -42,7 +42,7 @@ namespace arc::structures {
         T get(int key)  {
 
             while(true) {
-
+if(key >= length) return T{};
                 if (items == nullptr) {createArray(length);}
                 else
                     return items[key];

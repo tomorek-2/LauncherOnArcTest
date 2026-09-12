@@ -87,7 +87,7 @@ String urlDownloadLatest ="https://github.com/anuken/mindustry/releases/latest/d
         Core.batch = new SpriteBatch();
         Draw.batch(Core.batch);
         this.scene = new Scene(new ScreenViewport());
-//        Core.scene = this.scene;
+        Core.scene = this.scene;
 
         FontsAWT.load();
         this.regularFont = FontsAWT.regular;
