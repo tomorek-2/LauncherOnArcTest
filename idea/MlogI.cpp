@@ -10,12 +10,16 @@
 #include <charconv>
 #include <unistd.h>
 #include <atomic>
+#include <sys/ioctl.h>
+#include <chrono>
 static  arc::structures::ObjectMap<std::string, std::function<void(const std::string&)>> OQmap;
 static arc::structures::ObjectMap<std::string, double> doubleMap;
 static arc::structures::Seq<std::string> seq; //Команды.
 static arc::structures::Seq<std::string> seqL;
 static int ipt = 0;
 static int stepCounter = 0;
+static std::chrono::steady_clock::time_point waitMS; //Я тут подумал, чтобы избежать в главном потоке зависаний, нужно для wait логику как в горутинах (я не знаю что такое горутины).
+static bool isWaitingMLog = false;
 class parser {
 public:
 
@@ -56,7 +60,25 @@ OQmap.put("wait", [](std::string inputResult) {
 
 
     if( (ec == std::errc{}) && (ptr == inputResult.data() + inputResult.size())) {
-        usleep(vaw *  1000000);
+        if(isWaitingMLog) {
+            auto currentTime = std::chrono::steady_clock::now();
+         //   std::chrono::duration<double, std::milli> doubleCurrentTime;
+std::chrono::duration<double, std::milli> difference = currentTime - waitMS;
+if(difference.count() < 0 ) {
+    isWaitingMLog = false;
+}
+
+} else {
+    auto delay = std::chrono::milliseconds((int)(vaw * 1000));
+            waitMS = std::chrono::steady_clock::now() + delay;
+
+  //  std::chrono::duration<double, std::milli> difference = currentTime;
+ //   waitMS = difference.count();
+    isWaitingMLog = true;
+}
+
+
+
     };
      });
 
@@ -126,21 +148,30 @@ OQmap.put("wait", [](std::string inputResult) {
             return;
         });
     };
-    void start() {
+    int start() {
 
             parser p;
         for(int w = 0; stepCounter < seq.totalSpace; w) {
-            if (ipt < 100000) {
+            if (ipt < 10000) {
 
                 std::string tmpString = "";
                 tmpString = seq.get(stepCounter);
-                if (tmpString != "") p.exec(tmpString);
+                if (tmpString != "") {
+
+                    p.exec(tmpString);
+                    if(isWaitingMLog) {
+
+
+                        return 1;
+                    }
+                }
                 stepCounter++;
                 ipt++;
             } else break;
         }
         stepCounter = 0;
 ipt = 0 ;
+        return  0;
     }
     void add(std::string line) {
         if(line != "") {
@@ -206,24 +237,38 @@ int main() {
 std::string command = "";
 arc::util::Log::log("Парсер начинает работу, введите код");
    // std::getline(std::cin, command);
-
+    std::ios::sync_with_stdio(false);
 std::string line;
 parser p;
 p.init();
 bool running = true;
-
+int bytesInTerm = 0;
 
 while(true) {
     arc::util::Log::log("<MLog>");
 
 while(true) {
-    std::streamsize availBytes = std::cin.rdbuf()->in_avail();
+    line = "";
+    ioctl(0, FIONREAD, &bytesInTerm);
+if(bytesInTerm > 0) {
 
-    if (availBytes > 0) {
-        std::string buffer(availBytes, '\0');
-        std::cin.read(&buffer[0], availBytes);
-        line = buffer;
-    } else line = "";
+    char buffer[1024];
+    int input = read(0, buffer, 1023);
+    if(input < 0) {
+     arc::util::Log::log("input равен" + std::to_string(input));
+        input = 0;
+    }
+    buffer[input] = '\0';
+  //  arc::util::Log::log("input равен" + std::to_string(input));
+    std::string tmpString(buffer, 0, input - 1);
+    if(buffer[1] == '#') {
+        if(running) {
+            running = false;
+        } else running = true;
+    } else
+line = tmpString;
+
+} else line = "";
 
     if(line == "#") {
         if(running) {
@@ -234,24 +279,20 @@ while(true) {
     if(line != "") {
         if(line == "start") {
 
-            p.start();
+          int code =   p.start();
+          if(code == 0)
             seq.clear();
             break;
         }
         p.add(line);
+    } else
+    if(running){ p.start();
+
     }
-   // sleep(  0.01);
+    usleep(  0.01);
 
 }
 
-//p.exec("print ww");
 
-}
-/*
-p.exec(R"(set w 0.01)");
-    p.exec(R"(print "w)");
-p.exec("set w 2");
-    p.exec(R"(print "w)");
-*/
     return 0;
 }
