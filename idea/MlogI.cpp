@@ -31,7 +31,7 @@ OQmap.put("print", [](std::string result2) {
 std::string result2A;
 auto b = bytes[0];
 int l = 0;
-bool isString = true;
+bool isString = false;
 for(int i = 0; i < result2.length(); i++) {
 
     
@@ -40,9 +40,12 @@ if(b == 34) {
     l++;
 } else    result2A += b;
 if(l == 2) {
-    isString = false;
+    isString = true;
     break;
 }
+
+
+
 
 }
 if(!isString) {
@@ -64,7 +67,7 @@ OQmap.put("wait", [](std::string inputResult) {
             auto currentTime = std::chrono::steady_clock::now();
          //   std::chrono::duration<double, std::milli> doubleCurrentTime;
 std::chrono::duration<double, std::milli> difference = currentTime - waitMS;
-if(difference.count() < 0 ) {
+if(difference.count() > 0 ) {
     isWaitingMLog = false;
 }
 
@@ -235,7 +238,7 @@ return;
 
 int main() {
 std::string command = "";
-arc::util::Log::log("Парсер начинает работу, введите код");
+arc::util::Log::log("Парсер начинает работу, введите код. # чтобы включить выполнение.");
    // std::getline(std::cin, command);
     std::ios::sync_with_stdio(false);
 std::string line;
@@ -250,47 +253,47 @@ while(true) {
 while(true) {
     line = "";
     ioctl(0, FIONREAD, &bytesInTerm);
-if(bytesInTerm > 0) {
+    if (bytesInTerm > 0) {
 
-    char buffer[1024];
-    int input = read(0, buffer, 1023);
-    if(input < 0) {
-     arc::util::Log::log("input равен" + std::to_string(input));
-        input = 0;
-    }
-    buffer[input] = '\0';
-  //  arc::util::Log::log("input равен" + std::to_string(input));
-    std::string tmpString(buffer, 0, input - 1);
-    if(buffer[1] == '#') {
-        if(running) {
-            running = false;
-        } else running = true;
-    } else
-line = tmpString;
+        char buffer[1024];
+        int input = read(0, buffer, 1023);
+        if (input < 0) {
+            arc::util::Log::log("input равен" + std::to_string(input));
+            input = 0;
+        }
+        buffer[input] = '\0';
+        //  arc::util::Log::log("input равен" + std::to_string(input));
+        std::string tmpString(buffer, 0, input - 1);
+        if (buffer[1] == '#') {
+            if (running) {
+                running = false;
+            } else running = true;
+        } else
+            line = tmpString;
 
-} else line = "";
+    } else line = "";
 
-    if(line == "#") {
-        if(running) {
+    if (line == "#") {
+        if (running) {
             running = false;
         } else running = true;
         break;
     }
-    if(line != "") {
-        if(line == "start") {
+    if (line != "") {
+        if (line == "start") {
 
-          int code =   p.start();
-          if(code == 0)
-            seq.clear();
+            int code = p.start();
+            if (code == 0)
+                seq.clear();
             break;
         }
         p.add(line);
-    } else
-    if(running){ p.start();
+    } else if (running) {
+        p.start();
 
     }
-    usleep(  0.01);
-
+    usleep(0.01);
+}
 }
 
 

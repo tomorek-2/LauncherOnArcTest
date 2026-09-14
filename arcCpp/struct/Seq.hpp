@@ -1,4 +1,4 @@
-#ifndef ARC_STRUCT_SEQ_HPP
+#ifndef ARC_STRUCTURE_SEQ_HPP
 #define ARC_STRUCTURE_SEQ_HPP
 #include <string>
 namespace arc::structures {
