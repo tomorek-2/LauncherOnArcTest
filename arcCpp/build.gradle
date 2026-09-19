@@ -1,7 +1,9 @@
 plugins {
     id 'base'
 }
+dependencies {
 
+}
 
 tasks.register('compileApp', Exec) {
     group = 'build'

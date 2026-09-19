@@ -14,6 +14,7 @@
 #include <chrono>
 static  arc::structures::ObjectMap<std::string, std::function<void(const std::string&)>> OQmap;
 static arc::structures::ObjectMap<std::string, double> doubleMap;
+static arc::structures::ObjectMap<std::string, std::function<void(const std::string&)>> InstructOpMap;
 static arc::structures::Seq<std::string> seq; //Команды.
 static arc::structures::Seq<std::string> seqL;
 static int ipt = 0;
@@ -26,6 +27,76 @@ public:
     void init() {
 
         doubleMap.replace = true;
+        InstructOpMap.put("add", [](std::string inputResult) {
+
+std::string result, result2, result3;
+auto bytes = inputResult.c_str();
+int i = 0;
+for(int w = 0; i < inputResult.length(); i++) {
+    auto charB = bytes[i];
+    if(charB == 32) {
+        i++;
+      //  result = inputResult.substr(0, w);
+        break;
+
+    }
+    if(charB == 10) {
+        arc::util::Log::warn("Неккоректный аргумент");
+        return;
+    }
+    result += charB;
+    w++;
+
+}
+
+            for(int w = 0; i < inputResult.length(); i++) {
+                auto charB = bytes[i];
+                if(charB == 32) {
+                    i++;
+                  //  result2 = inputResult.substr(result.length() + 1, i);
+                    break;
+
+                }
+                if(charB == 10) {
+                 //   arc::util::Log::warn("Неккоректный аргумент");
+                    return;
+                }
+                result2 += charB;
+                w++;
+
+            }
+            for(int w = 0; i < inputResult.length(); i++) {
+                auto charB = bytes[i];
+                if(charB == 32) {
+                    i++;
+                   // result3 = inputResult.substr(result2.length() + 1, i);
+                    break;
+
+                }
+                if(charB == 10) {
+                    //   arc::util::Log::warn("Неккоректный аргумент");
+                    break;
+                }
+                result3 += charB;
+                w++;
+
+            }
+            double vaw = 0.0;
+            double vaw2 = 0.0;
+            auto [ptr, ec] = std::from_chars(result2.data(), result2.data() + result2.size(), vaw);
+            auto [ptr2, ec2] = std::from_chars(result3.data(), result3.data() + result3.size(), vaw2);
+
+            if( (ec == std::errc{}) && (ptr == result2.data() + result2.size())) {
+                if ((ec2 == std::errc{}) && (ptr2 == result3.data() + result3.size())) {
+                //    arc::util::Log::warn(inputResult + result + result2 + result3 + std::to_string(vaw) + std::to_string(vaw2));
+                    doubleMap.put(result, vaw + vaw2);
+
+
+            }else
+                arc::util::Log::warn("Что то случилось в конце add:"+ result + "result2"+result2+ "result3"+ result3 + std::to_string(i));
+            } else
+        arc::util::Log::warn("Что то случилось в конце add 2"+ result + "result2"+result2+ "result3"+ result3 + std::to_string(i));
+        });
 OQmap.put("print", [](std::string result2) {
     const char* bytes = result2.c_str();
 std::string result2A;
@@ -54,9 +125,11 @@ if(!isString) {
 
  arc::util::Log::info(result2);
 });
+
 OQmap.put("end", [](std::string result2) {
    stepCounter = 0;
 });
+
 OQmap.put("wait", [](std::string inputResult) {
     double vaw = 0.0;
     auto [ptr, ec] = std::from_chars(inputResult.data(), inputResult.data() + inputResult.size(), vaw);
@@ -84,7 +157,48 @@ if(difference.count() > 0 ) {
 
     };
      });
+OQmap.put("op", [](std::string inputResult) {
+    std::string operat = "";
+    std::string result = "";
+    std::string result2 = "";
+    int i = 0;
+    const char* bytes = inputResult.c_str();
+    for(int w = 0; i < inputResult.length(); i++) {
+        auto charB = bytes[i];
+        if(charB == 32) {
+            i++;
+            operat = inputResult.substr(0, w);
+            break;
+        }
+        if(charB == 10) {
+            arc::util::Log::info("Нету второго аргумента");
+            return;
+        }
+        operat += charB;
+        w++;
 
+        }
+for(int w = 0; i < inputResult.length(); i++) {
+    auto charB = bytes[i];
+
+    if(charB==32) {
+        i++;
+       result = inputResult.substr(operat.length() + 1);
+        break;
+
+    }
+    result += charB;
+  //  w++;
+
+}
+
+auto resultVoid = InstructOpMap.get(operat);
+if(resultVoid) {
+    resultVoid(result);
+    return;
+} else arc::util::Log::warn("operat was null");
+
+});
              OQmap.put("set", [](std::string inputResult) {
                  std::string result = "";
                  std::string result2 = "";
@@ -217,6 +331,7 @@ result = lines.substr(0, l);
         }
         result2 += b;
     }
+
     /*if(result2 == "") {
         arc::util::Log::warn("Введён неверный аргумент." + result2);
         return;
@@ -244,7 +359,7 @@ arc::util::Log::log("Парсер начинает работу, введите 
 std::string line;
 parser p;
 p.init();
-bool running = true;
+bool running = false;
 int bytesInTerm = 0;
 
 while(true) {
@@ -264,13 +379,15 @@ while(true) {
         buffer[input] = '\0';
         //  arc::util::Log::log("input равен" + std::to_string(input));
         std::string tmpString(buffer, 0, input - 1);
+
         if (buffer[1] == '#') {
             if (running) {
                 running = false;
             } else running = true;
         } else
-            line = tmpString;
-
+            if(buffer[input - 1] != 8) {
+                line = tmpString;
+            } else line = std::string(buffer, 0, input - 2);
     } else line = "";
 
     if (line == "#") {
@@ -292,10 +409,12 @@ while(true) {
         p.start();
 
     }
-    usleep(0.01);
+    usleep(0.001);
 }
 }
 
 
     return 0;
 }
+
+

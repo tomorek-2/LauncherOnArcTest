@@ -8,7 +8,6 @@ namespace arc::structures {
     public:
         int length = 500;
 
-
         T* items = nullptr;
         bool* freeSpace = nullptr;
         int freeSpaceI = 0;
@@ -34,7 +33,6 @@ namespace arc::structures {
                 items[freeSpaceI] = item;
                 freeSpaceI++;
                 return;
-
 
             }
         };
@@ -122,7 +120,7 @@ if(key >= length) return T{};
 
 
     };
-
+    
 
 
 }
